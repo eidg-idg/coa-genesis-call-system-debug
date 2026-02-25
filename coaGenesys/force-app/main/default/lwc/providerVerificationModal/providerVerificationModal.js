@@ -15,14 +15,14 @@ export default class ProviderVerificationModal extends LightningElement {
     @api callerANI = '';
 
     @track checkedValues = [];
-    @track caseOriginValue = '';
-    @track isCallingOnBehalf = false;
-    @track callerName = '';
-    @track callerTypeValue = '';
-    @track callerPhoneNumber = '';
-    @track phoneExtension = '';
-    @track isSaving = false;
-    @track errorMessage = '';
+    caseOriginValue = '';
+    isCallingOnBehalf = false;
+    callerName = '';
+    callerTypeValue = '';
+    callerPhoneNumber = '';
+    phoneExtension = '';
+    isSaving = false;
+    errorMessage = '';
 
     get caseOriginOptions() {
         return [

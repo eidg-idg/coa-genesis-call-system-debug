@@ -1,4 +1,5 @@
 global class MyScreenPopExtension7 implements purecloud.CTIExtension.ScreenPop {
+// DEPRECATED - replaced by GenesysCTIExtensionClassV2. Do not activate.
     public String onScreenPop(String jsonData) {
         // Deserialize the inbound JSON data to a Map
         Map<String, Object> deserializedData = (Map<String, Object>) JSON.deserializeUntyped(jsonData);

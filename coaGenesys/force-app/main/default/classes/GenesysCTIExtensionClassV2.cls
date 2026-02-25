@@ -1,8 +1,6 @@
 global class GenesysCTIExtensionClassV2 implements purecloud.CTIExtension.ScreenPop {
     // Class-level variables to store parsed values
     public String sf_last4SSN;
-    public String sf_ANI;
-    public String sf_RecordId;
     public String sf_NPI;
 
     public String onScreenPop(String jsonData) {
@@ -34,11 +32,7 @@ global class GenesysCTIExtensionClassV2 implements purecloud.CTIExtension.Screen
         sf_last4SSN = sfSearchValueData.containsKey('Last4SSN') ? (String) sfSearchValueData.get('Last4SSN') : null;
         System.debug('The Last 4 SSN value from the interaction payload is: ' + sf_last4SSN);
         
-        sf_ANI = sfSearchValueData.containsKey('ANI') ? (String) sfSearchValueData.get('ANI') : null;
-        System.debug('The ANI value from the interaction payload is: ' + sf_ANI);
-        
-        sf_RecordId = sfSearchValueData.containsKey('RecordID') ? (String) sfSearchValueData.get('RecordID') : null;
-        System.debug('The SF Record Id from the interaction payload is: ' + sf_RecordId);
+        // sf_ANI and sf_RecordId extracted from payload but not used downstream — removed
 
         // Extract NPI if present in the JSON payload
         sf_NPI = sfSearchValueData.containsKey('NPI') ? (String) sfSearchValueData.get('NPI') : null;
@@ -65,7 +59,7 @@ global class GenesysCTIExtensionClassV2 implements purecloud.CTIExtension.Screen
         // Query for Accounts matching both Phone and Last_4_SSN_V2__c
         if (String.isNotBlank(searchValue) && String.isNotBlank(sf_last4SSN)) {
             System.debug('Querying for accounts matching both Phone and Last_4_SSN_V2__c');
-            List<Account> bothMatchAccounts = [SELECT Id FROM Account WHERE Phone = :searchValue AND Last_4_SSN_V2__c = :sf_last4SSN];
+            List<Account> bothMatchAccounts = [SELECT Id FROM Account WHERE Phone = :searchValue AND Last_4_SSN_V2__c = :sf_last4SSN LIMIT 50];
             System.debug('Accounts matching both Phone and Last_4_SSN_V2__c: ' + bothMatchAccounts.size());
             for (Account acc : bothMatchAccounts) {
                 bothMatches.add(acc.Id);
@@ -75,7 +69,7 @@ global class GenesysCTIExtensionClassV2 implements purecloud.CTIExtension.Screen
         // Query for Accounts matching Last_4_SSN_V2__c only
         if (String.isNotBlank(sf_last4SSN)) {
             System.debug('Querying for accounts matching Last_4_SSN_V2__c');
-            List<Account> ssnMatchAccounts = [SELECT Id FROM Account WHERE Last_4_SSN_V2__c = :sf_last4SSN AND Id NOT IN :bothMatches];
+            List<Account> ssnMatchAccounts = [SELECT Id FROM Account WHERE Last_4_SSN_V2__c = :sf_last4SSN AND Id NOT IN :bothMatches LIMIT 50];
             System.debug('Accounts matching Last_4_SSN_V2__c only: ' + ssnMatchAccounts.size());
             for (Account acc : ssnMatchAccounts) {
                 ssnMatches.add(acc.Id);
@@ -85,7 +79,7 @@ global class GenesysCTIExtensionClassV2 implements purecloud.CTIExtension.Screen
         // Query for Accounts matching Phone only
         if (String.isNotBlank(searchValue)) {
             System.debug('Querying for accounts matching Phone');
-            List<Account> phoneMatchAccounts = [SELECT Id FROM Account WHERE Phone = :searchValue AND Id NOT IN :bothMatches];
+            List<Account> phoneMatchAccounts = [SELECT Id FROM Account WHERE Phone = :searchValue AND Id NOT IN :bothMatches LIMIT 50];
             System.debug('Accounts matching Phone only: ' + phoneMatchAccounts.size());
             for (Account acc : phoneMatchAccounts) {
                 phoneMatches.add(acc.Id);
@@ -131,7 +125,7 @@ global class GenesysCTIExtensionClassV2 implements purecloud.CTIExtension.Screen
         // Query for Healthcare Providers matching both Phone and NPI
         if (String.isNotBlank(searchValue) && String.isNotBlank(sf_NPI)) {
             System.debug('Querying for Healthcare Providers matching both Phone and NPI');
-            List<HealthcareProvider> bothMatchHCPs = [SELECT Id FROM HealthcareProvider WHERE UST_EPLUS__Primary_Phone_Number__c = :searchValue AND UST_EPLUS__Provider_NPI__c = :sf_NPI AND RecordTypeId = :recordTypeId];
+            List<HealthcareProvider> bothMatchHCPs = [SELECT Id FROM HealthcareProvider WHERE UST_EPLUS__Primary_Phone_Number__c = :searchValue AND UST_EPLUS__Provider_NPI__c = :sf_NPI AND RecordTypeId = :recordTypeId LIMIT 50];
             System.debug('Healthcare Providers matching both Phone and NPI: ' + bothMatchHCPs.size());
             for (HealthcareProvider hcp : bothMatchHCPs) {
                 bothHCPMatches.add(hcp.Id);
@@ -141,7 +135,7 @@ global class GenesysCTIExtensionClassV2 implements purecloud.CTIExtension.Screen
         // Query for Healthcare Providers matching NPI only
         if (String.isNotBlank(sf_NPI)) {
             System.debug('Querying for Healthcare Providers matching NPI only');
-            List<HealthcareProvider> npiMatchHCPs = [SELECT Id FROM HealthcareProvider WHERE UST_EPLUS__Provider_NPI__c = :sf_NPI AND RecordTypeId = :recordTypeId AND Id NOT IN :bothHCPMatches];
+            List<HealthcareProvider> npiMatchHCPs = [SELECT Id FROM HealthcareProvider WHERE UST_EPLUS__Provider_NPI__c = :sf_NPI AND RecordTypeId = :recordTypeId AND Id NOT IN :bothHCPMatches LIMIT 50];
             System.debug('Healthcare Providers matching NPI only: ' + npiMatchHCPs.size());
             for (HealthcareProvider hcp : npiMatchHCPs) {
                 npiHCPMatches.add(hcp.Id);
@@ -151,7 +145,7 @@ global class GenesysCTIExtensionClassV2 implements purecloud.CTIExtension.Screen
         // Query for Healthcare Providers matching Phone only
         if (String.isNotBlank(searchValue)) {
             System.debug('Querying for Healthcare Providers matching Phone only');
-            List<HealthcareProvider> phoneMatchHCPs = [SELECT Id FROM HealthcareProvider WHERE UST_EPLUS__Primary_Phone_Number__c = :searchValue AND RecordTypeId = :recordTypeId AND Id NOT IN :bothHCPMatches];
+            List<HealthcareProvider> phoneMatchHCPs = [SELECT Id FROM HealthcareProvider WHERE UST_EPLUS__Primary_Phone_Number__c = :searchValue AND RecordTypeId = :recordTypeId AND Id NOT IN :bothHCPMatches LIMIT 50];
             System.debug('Healthcare Providers matching Phone only: ' + phoneMatchHCPs.size());
             for (HealthcareProvider hcp : phoneMatchHCPs) {
                 phoneHCPMatches.add(hcp.Id);

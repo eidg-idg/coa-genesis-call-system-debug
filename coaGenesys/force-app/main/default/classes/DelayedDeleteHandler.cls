@@ -9,8 +9,7 @@ public class DelayedDeleteHandler implements Queueable {
         try {
             delete [SELECT Id FROM HealthcareProvider WHERE Id IN :idsToDelete];
         } catch(Exception e) {
-            System.debug('Error deleting records: ' + e.getMessage());
-            // Handle the exception or log as required
+            System.debug(LoggingLevel.ERROR, 'DelayedDeleteHandler failed for IDs: ' + idsToDelete + ' | Error: ' + e.getMessage());
         }
     }
 }

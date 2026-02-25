@@ -66,4 +66,33 @@ private class Test_GC_HCPPageController {
         System.assertEquals(0, controller.fetchedRecords.size(), 'fetchedRecords should be empty');
         System.assertEquals('[]', controller.fetchedRecordsJson, 'Serialized JSON should be an empty array');
     }
+
+    @isTest
+    static void testControllerWithANI() {
+        setupTriggerSettings();
+        HealthcareProvider testHCP = createTestHealthcareProvider();
+
+        Test.setCurrentPage(Page.VerifyHealthcareProviderVisualforcePage);
+        List<Id> ids = new List<Id>{testHCP.Id};
+        ApexPages.currentPage().getParameters().put('ids', JSON.serialize(ids));
+        ApexPages.currentPage().getParameters().put('ani', '7205559876');
+
+        GC_HealthcareProvider_PageController controller = new GC_HealthcareProvider_PageController();
+
+        System.assertEquals(1, controller.fetchedRecords.size(), 'Should fetch one record.');
+        System.assertEquals('7205559876', controller.callerANI, 'ANI should be captured from URL parameter.');
+    }
+
+    @isTest
+    static void testControllerWithMalformedIds() {
+        setupTriggerSettings();
+
+        Test.setCurrentPage(Page.VerifyHealthcareProviderVisualforcePage);
+        ApexPages.currentPage().getParameters().put('ids', 'invalid-json-data');
+
+        GC_HealthcareProvider_PageController controller = new GC_HealthcareProvider_PageController();
+
+        System.assertEquals(0, controller.fetchedRecords.size(), 'Should handle malformed JSON gracefully.');
+        System.assertNotEquals(null, controller.fetchedRecordsJson, 'Serialized JSON should still not be null.');
+    }
 }

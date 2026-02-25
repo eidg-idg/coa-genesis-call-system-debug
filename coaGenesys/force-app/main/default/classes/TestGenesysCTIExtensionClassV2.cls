@@ -179,4 +179,56 @@ private class TestGenesysCTIExtensionClassV2 {
         System.assertNotEquals(null, result, 'Result should not be null.');
         System.assert(result.contains(testHCP.Id) || result.contains(testAcc.Id), 'Result should contain either the Healthcare Provider ID or the Account ID.');
     }
+
+    @isTest
+    static void testANIPassedInMemberURL() {
+        Account testAcc = createTestAccount('1234567890', '1234');
+
+        GenesysCTIExtensionClassV2 extension = new GenesysCTIExtensionClassV2();
+        String jsonData = '{"searchValue": "1234567890", "interaction": {"attributes": {"sf_searchvalue": "{\\"Last4SSN\\":\\"1234\\"}"}}}';
+        String result = extension.onScreenPop(jsonData);
+
+        System.assertNotEquals(null, result, 'Result should not be null.');
+        System.assert(result.contains('VerifyMemberVisualforcePage'), 'Result should contain member VF page URL.');
+        System.assert(result.contains('ani='), 'Result should contain ANI parameter in the URL.');
+    }
+
+    @isTest
+    static void testANIPassedInProviderURL() {
+        HealthcareProvider testHCP = createTestHealthcareProvider('1234567890', '1111111111');
+
+        GenesysCTIExtensionClassV2 extension = new GenesysCTIExtensionClassV2();
+        String jsonData = '{"searchValue": "1234567890", "interaction": {"attributes": {"sf_searchvalue": "{\\"NPI\\":\\"1111111111\\"}"}}}';
+        String result = extension.onScreenPop(jsonData);
+
+        System.assertNotEquals(null, result, 'Result should not be null.');
+        System.assert(result.contains('VerifyHealthcareProviderVisualforcePage'), 'Result should contain provider VF page URL.');
+        System.assert(result.contains('ani='), 'Result should contain ANI parameter in the URL.');
+    }
+
+    @isTest
+    static void testMalformedJsonFallsBackToDefaultScreenPop() {
+        GenesysCTIExtensionClassV2 extension = new GenesysCTIExtensionClassV2();
+        String jsonData = 'this is not valid JSON';
+        String result = extension.onScreenPop(jsonData);
+
+        System.assertNotEquals(null, result, 'Result should not be null even with malformed JSON.');
+        System.assert(result.contains('defaultScreenPop'), 'Result should indicate default screen pop on malformed JSON.');
+    }
+
+    @isTest
+    static void testNullSearchValueNoANI() {
+        Account testAcc = createTestAccount('5555555555', '9999');
+
+        GenesysCTIExtensionClassV2 extension = new GenesysCTIExtensionClassV2();
+        // searchValue is null, but sf_last4SSN matches
+        String jsonData = '{"interaction": {"attributes": {"sf_searchvalue": "{\\"Last4SSN\\":\\"9999\\"}"}}}';
+        String result = extension.onScreenPop(jsonData);
+
+        System.assertNotEquals(null, result, 'Result should not be null.');
+        // Should still find the account via SSN-only match
+        System.assert(result.contains(testAcc.Id), 'Result should contain the Account ID from SSN-only match.');
+        // URL should not contain ani= since searchValue was null
+        System.assert(!result.contains('ani='), 'Result should not contain ANI parameter when searchValue is null.');
+    }
 }

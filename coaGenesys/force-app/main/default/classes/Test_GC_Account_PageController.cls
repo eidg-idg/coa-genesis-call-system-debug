@@ -61,4 +61,29 @@ private class Test_GC_Account_PageController {
         System.assertEquals(0, controller.fetchedRecords.size(), 'Should not fetch any records.');
         System.assertNotEquals(null, controller.fetchedRecordsJson, 'Serialized JSON should still not be null.');
     }
+
+    @isTest
+    static void testControllerWithANI() {
+        List<Id> accountIds = createTestAccounts();
+
+        Test.setCurrentPage(new PageReference('Page.dummyPage'));
+        ApexPages.currentPage().getParameters().put('ids', JSON.serialize(accountIds));
+        ApexPages.currentPage().getParameters().put('ani', '3035551234');
+
+        GC_Account_PageController controller = new GC_Account_PageController();
+
+        System.assertEquals(2, controller.fetchedRecords.size(), 'Should fetch exactly two records.');
+        System.assertEquals('3035551234', controller.callerANI, 'ANI should be captured from URL parameter.');
+    }
+
+    @isTest
+    static void testControllerWithMalformedIds() {
+        Test.setCurrentPage(new PageReference('Page.dummyPage'));
+        ApexPages.currentPage().getParameters().put('ids', 'not-valid-json');
+
+        GC_Account_PageController controller = new GC_Account_PageController();
+
+        System.assertEquals(0, controller.fetchedRecords.size(), 'Should handle malformed JSON gracefully.');
+        System.assertNotEquals(null, controller.fetchedRecordsJson, 'Serialized JSON should still not be null.');
+    }
 }

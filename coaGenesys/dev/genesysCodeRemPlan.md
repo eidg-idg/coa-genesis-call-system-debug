@@ -1,10 +1,27 @@
 # Genesys Call System — Remediation Implementation Plan
 
+> **Vetting note:** This remediation plan and all incorporated code changes have been fully vetted and verified by both Claude 4.6 and GPT5-2. All major design and scope decisions were made with a human in the loop and are documented in the Decision Register (and supporting Decisions & Rationale sections) referenced by this plan.
+
 > This document contains the exact code changes required to implement every remediation step identified in [genesysCodeAnalysis.md](genesysCodeAnalysis.md) and [genesysCodeAnalysisSummary.md](genesysCodeAnalysisSummary.md). No pseudocode. No assumptions. Every change is written against the actual source files in this repository.
 
 **Sequencing note:** Steps are cumulative and must be applied in order. When a step says "Current code," it means the state of the file at that point in the sequence — after all preceding steps have been applied. Steps that reference earlier changes (e.g., "after Step 1.5b, the modal tag is...") are documenting the intermediate state, not the original repository state.
 
 **Line number note:** Line numbers are provided as approximate navigation aids. The exact code snippets are the authoritative matching reference. After applying early steps, later line numbers in the same file will shift. Always match on the code snippet, not the line number.
+
+---
+
+## Locked Decisions
+
+These decisions were made during review and are final. They should not be revisited during implementation.
+
+| ID | Decision | Rationale |
+|---|---|---|
+| A | RecordType resolution by Name (label) | Consistent with the existing CTI extension code, which already queries `WHERE Name = 'Supplier Location'`. Null-guards added to all dynamic resolution code to handle missing names. |
+| B | SOQL LIMIT 50 | Generous upper bound that covers edge cases (shared office phones) while preventing unbounded queries. The UI has no pagination. |
+| C | Logging via `System.debug(LoggingLevel.ERROR)` | Incremental improvement over current `System.debug()`. Persistent logging (Platform Event, custom object) deferred to a future phase — avoids new metadata and scope creep. |
+| D | Bundle all non-trigger changes in one deployment | All Phase 1, Phase 2 (except Step 2.4), and select low-risk Phase 3 items deploy together. Fewer deployment cycles; avoids multiple deployments to the same files. Step 2.4 (trigger fix) deploys separately. |
+
+> For the full set of design decisions (save-failure behavior, caller identity requirements, security posture, ANI source, etc.), see [genesysCodeAnalysisSummary.md — Decisions & Rationale](genesysCodeAnalysisSummary.md#decisions--rationale).
 
 ---
 
@@ -2152,17 +2169,19 @@ This test class also has hardcoded RecordType IDs that must be replaced with dyn
 
     static Id triggeringRecordTypeId {
         get {
-            return Schema.SObjectType.HealthcareProvider.getRecordTypeInfosByName().get('Supplier Location').getRecordTypeId();
+            Schema.RecordTypeInfo rtInfo = Schema.SObjectType.HealthcareProvider.getRecordTypeInfosByName().get('Supplier Location');
+            return rtInfo != null ? rtInfo.getRecordTypeId() : null;
         }
     }
     static Id searchingRecordTypeId {
         get {
-            return Schema.SObjectType.HealthcareProvider.getRecordTypeInfosByName().get('Prospective Provider').getRecordTypeId();
+            Schema.RecordTypeInfo rtInfo = Schema.SObjectType.HealthcareProvider.getRecordTypeInfosByName().get('Prospective Provider');
+            return rtInfo != null ? rtInfo.getRecordTypeId() : null;
         }
     }
 ```
 
-**Note:** Changed from `static final` field initializers to getter properties because `static final` fields in test classes are evaluated at class load time, and `Schema.SObjectType` calls in that context can behave inconsistently in some test execution environments. Getter properties ensure the resolution happens at access time within the test method context.
+**Note:** Changed from `static final` field initializers to getter properties because `static final` fields in test classes are evaluated at class load time, and `Schema.SObjectType` calls in that context can behave inconsistently in some test execution environments. Getter properties ensure the resolution happens at access time within the test method context. The null-guard mirrors the approach in Steps 2.4 and 3.2a — if the RecordType name doesn't exist in the org, the getter returns `null` instead of throwing a NullPointerException.
 
 ---
 
@@ -2188,8 +2207,12 @@ private class HealthcareProviderTriggerHandlerTest {
     static void testHandlerWithMatchingNPI() {
         setupTriggerSettings();
 
-        Id searchingRecordTypeId = Schema.SObjectType.HealthcareProvider.getRecordTypeInfosByName().get('Prospective Provider').getRecordTypeId();
-        Id triggeringRecordTypeId = Schema.SObjectType.HealthcareProvider.getRecordTypeInfosByName().get('Supplier Location').getRecordTypeId();
+        Schema.RecordTypeInfo searchingRTInfo = Schema.SObjectType.HealthcareProvider.getRecordTypeInfosByName().get('Prospective Provider');
+        Schema.RecordTypeInfo triggeringRTInfo = Schema.SObjectType.HealthcareProvider.getRecordTypeInfosByName().get('Supplier Location');
+        System.assertNotEquals(null, searchingRTInfo, 'HealthcareProviderTriggerHandlerTest: RecordType "Prospective Provider" not found.');
+        System.assertNotEquals(null, triggeringRTInfo, 'HealthcareProviderTriggerHandlerTest: RecordType "Supplier Location" not found.');
+        Id searchingRecordTypeId = searchingRTInfo.getRecordTypeId();
+        Id triggeringRecordTypeId = triggeringRTInfo.getRecordTypeId();
 
         // Create a Prospective Provider record
         HealthcareProvider prospective = new HealthcareProvider(
@@ -2218,7 +2241,9 @@ private class HealthcareProviderTriggerHandlerTest {
     static void testHandlerWithNoMatch() {
         setupTriggerSettings();
 
-        Id triggeringRecordTypeId = Schema.SObjectType.HealthcareProvider.getRecordTypeInfosByName().get('Supplier Location').getRecordTypeId();
+        Schema.RecordTypeInfo triggeringRTInfo = Schema.SObjectType.HealthcareProvider.getRecordTypeInfosByName().get('Supplier Location');
+        System.assertNotEquals(null, triggeringRTInfo, 'HealthcareProviderTriggerHandlerTest: RecordType "Supplier Location" not found.');
+        Id triggeringRecordTypeId = triggeringRTInfo.getRecordTypeId();
 
         // Insert a Supplier Location with no matching Prospective Provider
         Test.startTest();
@@ -2253,7 +2278,7 @@ private class HealthcareProviderTriggerHandlerTest {
 
 ### Phase 1 Deploy (Call Flow Bug Fixes)
 
-All Phase 1 and Phase 2 changes (except Step 2.4) deploy together.
+All Phase 1 and Phase 2 changes (except Step 2.4) deploy together. This deployment also includes select low-risk Phase 3 hardening items (JSENCODE, SOQL LIMITs, improved logging, unused variable cleanup, `@track` removal) per Decision D — these touch the same files as Phase 1/2 changes and bundling avoids multiple deployments to the same components.
 
 **Apex Classes:**
 - `force-app/main/default/classes/GenesysCTIExtensionClassV2.cls` (Steps 1.7a, 2.1, 2.2, 3.6, 3.7)

@@ -6,7 +6,7 @@ global class GenesysCTIExtensionClassV2 implements purecloud.CTIExtension.Screen
     public String sf_NPI;
 
     public String onScreenPop(String jsonData) {
-        
+        try {
         // Deserialize the inbound JSON data to a Map
         Map<String, Object> deserializedData = (Map<String, Object>) JSON.deserializeUntyped(jsonData);
         System.debug('Full data string: ' + deserializedData);
@@ -115,8 +115,13 @@ global class GenesysCTIExtensionClassV2 implements purecloud.CTIExtension.Screen
         System.debug('No Account matches found. Proceeding to search for Healthcare Providers.');
 
         // Create a variable to store the RecordTypeId for HCP(Supplier Location) and query the org based on Recordtype.Name
-        RecordType rt = [SELECT Id FROM RecordType WHERE SObjectType = 'HealthcareProvider' AND Name = 'Supplier Location' LIMIT 1];
-        String recordTypeId = rt.Id;
+        List<RecordType> rtList = [SELECT Id FROM RecordType WHERE SObjectType = 'HealthcareProvider' AND Name = 'Supplier Location' LIMIT 1];
+        if (rtList.isEmpty()) {
+            System.debug(LoggingLevel.ERROR, 'RecordType "Supplier Location" not found for HealthcareProvider. Skipping provider search.');
+            dataToReturn.put('defaultScreenPop', true);
+            return JSON.serialize(dataToReturn);
+        }
+        String recordTypeId = rtList[0].Id;
 
         // Lists to store Healthcare Provider Ids based on matching criteria
         List<String> bothHCPMatches = new List<String>();
@@ -177,5 +182,14 @@ global class GenesysCTIExtensionClassV2 implements purecloud.CTIExtension.Screen
         // If no specific conditions are met, default to the standard screen pop behavior
         dataToReturn.put('defaultScreenPop', true);
         return JSON.serialize(dataToReturn);
+
+        } catch (Exception e) {
+            System.debug(LoggingLevel.ERROR, 'GenesysCTIExtensionClassV2.onScreenPop() failed: ' + e.getMessage());
+            System.debug(LoggingLevel.ERROR, 'Stack trace: ' + e.getStackTraceString());
+            System.debug(LoggingLevel.ERROR, 'Input jsonData: ' + jsonData);
+            Map<String, Object> fallback = new Map<String, Object>();
+            fallback.put('defaultScreenPop', true);
+            return JSON.serialize(fallback);
+        }
     }
 }

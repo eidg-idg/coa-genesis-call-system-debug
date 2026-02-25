@@ -52,8 +52,12 @@
                 </header>
                 <!-- Modal content -->
                 <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                    <c-provider-verification-modal 
-                        healthcare-provider={selectedProvider} 
+                    <c-provider-verification-modal
+                        healthcare-provider={selectedProvider}
+                        interaction-id={interactionRecordId}
+                        interaction-name={interactionName}
+                        provider-id={selectedProviderId}
+                        caller-a-n-i={callerANI}
                         onclose={handleModalClose}>
                     </c-provider-verification-modal>
                 </div>

@@ -1,10 +1,12 @@
 public class GC_HealthcareProvider_PageController {
     public List<HealthcareProvider> fetchedRecords {get; private set;}
     public String fetchedRecordsJson {get; private set;} //JSON string for the records
+    public String callerANI { get; private set; }
 
     public GC_HealthcareProvider_PageController() {
         // Retrieve the serialized list of IDs from the page parameter
         String recordIdsJson = ApexPages.currentPage().getParameters().get('ids');
+        callerANI = ApexPages.currentPage().getParameters().get('ani');
         if (String.isNotBlank(recordIdsJson)) {
             // Deserialize the JSON string back to a list of IDs
             List<Id> recordIds = (List<Id>) JSON.deserialize(recordIdsJson, List<Id>.class);

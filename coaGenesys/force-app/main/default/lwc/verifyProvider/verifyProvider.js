@@ -4,6 +4,7 @@ import INTERACTION_OBJECT from '@salesforce/schema/UST_EPLUS__Interaction__c';
 
 export default class VerifyProvider extends LightningElement {
     @api providers = []; // Array of healthcare providers passed from Visualforce
+    @api callerANI = '';
     @track isModalOpen = false;
     @track selectedProviderId = null;
     @track interactionRecordId = null;
@@ -58,20 +59,8 @@ export default class VerifyProvider extends LightningElement {
     openModal(providerId) {
         this.selectedProviderId = providerId;
         this.isModalOpen = true;
-
         console.log('Modal open:', this.isModalOpen);
         console.log('Selected Provider ID:', this.selectedProviderId);
-
-        // Wait for the modal to be rendered before setting the interaction data
-        setTimeout(() => {
-            const modal = this.template.querySelector('c-provider-verification-modal');
-            if (modal) {
-                modal.interactionId = this.interactionRecordId;
-                modal.interactionName = this.interactionName;
-                modal.providerId = this.selectedProviderId; // Pass providerId directly
-                modal.healthcareProvider = this.selectedProvider();
-            }
-        }, 0);
     }
 
     handleModalClose() {
@@ -81,7 +70,7 @@ export default class VerifyProvider extends LightningElement {
         this.interactionName = null;
     }
 
-    selectedProvider() {
+    get selectedProvider() {
         return this.providers.find(provider => provider.recordId === this.selectedProviderId);
     }
 

@@ -33,7 +33,7 @@
         // Create the LWC component and add it to the DOM
         $Lightning.createComponent(
             "c:verifyMember",
-            { accounts: records },
+            { accounts: records, callerANI: '{!JSENCODE(callerANI)}' },
             "lwcContainer",
             function(component) {
                 console.log("LWC 'verifyMember' has been created successfully.");

@@ -11,7 +11,8 @@ export default class ProviderVerificationModal extends LightningElement {
     @api healthcareProvider;
     @api interactionId;
     @api interactionName;
-    @api providerId; // Add this to receive the providerId from the parent
+    @api providerId;
+    @api callerANI = '';
 
     @track checkedValues = [];
     @track caseOriginValue = '';
@@ -20,6 +21,8 @@ export default class ProviderVerificationModal extends LightningElement {
     @track callerTypeValue = '';
     @track callerPhoneNumber = '';
     @track phoneExtension = '';
+    @track isSaving = false;
+    @track errorMessage = '';
 
     get caseOriginOptions() {
         return [
@@ -40,6 +43,10 @@ export default class ProviderVerificationModal extends LightningElement {
             { label: 'Hospital Staff/Facility', value: 'Hospital Staff/Facility' },
             { label: 'Other', value: 'Other' }
         ];
+    }
+
+    get verifyButtonLabel() {
+        return this.isSaving ? 'Saving...' : 'Verify';
     }
 
     get formattedPhoneNumber() {
@@ -83,8 +90,11 @@ export default class ProviderVerificationModal extends LightningElement {
 
     connectedCallback() {
         console.log('HealthcareProvider data on connected:', JSON.stringify(this.healthcareProvider));
-        console.log('Provider ID from parent:', this.providerId); // Verify providerId is received
+        console.log('Provider ID from parent:', this.providerId);
         console.log('Interaction Name: ', this.interactionName);
+        if (this.callerANI && !this.callerPhoneNumber) {
+            this.callerPhoneNumber = this.callerANI;
+        }
         this.showVerificationSectionImmediately();
     }
 
@@ -113,6 +123,10 @@ export default class ProviderVerificationModal extends LightningElement {
         this.isCallingOnBehalf = event.target.checked;
     }
 
+    handleCallerTypeChange(event) {
+        this.callerTypeValue = event.detail.value;
+    }
+
     handleInputChange(event) {
         const { name, value } = event.target;
         this[name] = value;
@@ -125,24 +139,33 @@ export default class ProviderVerificationModal extends LightningElement {
         console.log('Interaction Name:', this.interactionName);
         console.log('Number of checked values:', this.checkedValues.length);
 
-        if (this.checkedValues.length >= 2) { 
+        // Validate Case Origin is selected
+        if (!this.caseOriginValue) {
+            this.errorMessage = 'Please select a Case Origin before verifying.';
+            return;
+        }
+
+        // Validate caller name is provided
+        if (!this.callerName || this.callerName.trim() === '') {
+            this.errorMessage = 'Caller Name is required.';
+            return;
+        }
+
+        if (this.checkedValues.length >= 2) {
             const verificationData = {
                 interactionId: this.interactionId,
-                providerId: this.providerId, // Ensure this is passed
+                providerId: this.providerId,
                 caseOrigin: this.caseOriginValue,
                 callerName: this.callerName,
                 callerPhone: this.callerPhoneNumber,
             };
             console.log('Verification Data:', JSON.stringify(verificationData));
 
-            const closeEvent = new CustomEvent('close', {
-                detail: { verificationData }
-            });
-            this.dispatchEvent(closeEvent);
-
+            this.isSaving = true;
+            this.errorMessage = '';
             this.createVerificationRecord(verificationData);
         } else {
-            alert("Please select at least two verification options to proceed.");
+            this.errorMessage = "Please select at least two verification options to proceed.";
         }
     }
 
@@ -150,7 +173,7 @@ export default class ProviderVerificationModal extends LightningElement {
         const fields = {};
         fields[CSR_INTERACTION_FIELD.fieldApiName] = data.interactionId;
         fields[CALLER_NAME_FIELD.fieldApiName] = data.callerName;
-        fields[PROVIDER_FIELD.fieldApiName] = data.providerId; // Use the correct providerId
+        fields[PROVIDER_FIELD.fieldApiName] = data.providerId;
         fields[CASE_ORIGIN_FIELD.fieldApiName] = data.caseOrigin;
         fields[CALLER_PHONE_FIELD.fieldApiName] = data.callerPhone;
 
@@ -158,11 +181,17 @@ export default class ProviderVerificationModal extends LightningElement {
         createRecord(recordInput)
             .then(result => {
                 console.log('Verification Information Record Created:', result);
-                this.navigateToProviderPage(data.providerId); // Ensure correct providerId
+                this.isSaving = false;
+                const closeEvent = new CustomEvent('close', {
+                    detail: { verificationData: data }
+                });
+                this.dispatchEvent(closeEvent);
+                this.navigateToProviderPage(data.providerId);
             })
             .catch(error => {
                 console.error('Error creating verification information record:', error);
-                this.navigateToProviderPage(data.providerId); // Handle error and navigate
+                this.isSaving = false;
+                this.errorMessage = 'Verification record could not be saved. Please try again.';
             });
     }
 

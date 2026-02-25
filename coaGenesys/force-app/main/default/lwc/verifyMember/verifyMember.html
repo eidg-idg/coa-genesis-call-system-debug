@@ -51,10 +51,11 @@
                 </header>
                 <!-- Modal content -->
                 <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
-                    <c-member-verification-modal 
-                        account={selectedAccount} 
+                    <c-member-verification-modal
+                        account={selectedAccount}
                         interaction-id={interactionRecordId}
                         interaction-name={interactionName}
+                        caller-a-n-i={callerANI}
                         onclose={handleModalClose}>
                     </c-member-verification-modal>
                 </div>

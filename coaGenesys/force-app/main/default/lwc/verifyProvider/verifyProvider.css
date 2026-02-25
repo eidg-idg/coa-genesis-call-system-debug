@@ -1,0 +1,40 @@
+/* verifyProvider.css */
+:host {
+    width: 80%; /* Ensures that the host element takes full width */
+}
+
+.slds-grid_align-spread > .slds-col {
+    padding-right: 4px; /* Adjust padding to ensure alignment */
+    padding-left: 4px;
+}
+
+/* Styling for the header row */
+.header-row {
+    background-color: #f4f6f9; /* Light grey background */
+    border-top: 1px solid #d8dde6; /* Light grey top border */
+    border-bottom: 1px solid #d8dde6; /* Light grey bottom border */
+}
+
+/* Ensure the headers stand out */
+.header-row .slds-col {
+    font-weight: bold; /* Optional: if you want to make headers bold */
+}
+
+/* Styling for each provider row */
+.provider-row { /* This class name should be generic like 'data-row' or reused as 'account-row' */
+    border-top: 1px solid #d8dde6; /* Light grey top border */
+    border-bottom: 1px solid #d8dde6; /* Light grey bottom border */
+    margin-top: 5px; /* Spacing between rows */
+    margin-bottom: 5px; /* Spacing between rows */
+    padding-top: 8px; /* Padding for visual space */
+    padding-bottom: 8px; /* Padding for visual space */
+}
+
+/* Styling for Provider List Container */
+.table-container {
+    width: 90%;
+    border: 1px solid #d8dde6; /* Light grey border */
+    border-radius: 0.25rem; /* Rounded corners */
+    padding: 10px; /* Padding for visual space */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional SLDS-like box shadow for depth */
+}

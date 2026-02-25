@@ -1,0 +1,46 @@
+/* providerVerificationModal.css */
+pre {
+    font-family: inherit;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 0;
+}
+
+.required-asterisk, .asterisk-placeholder {
+    width: 10px;
+    text-align: center;
+    color: red;
+}
+
+.slds-align-center {
+    margin-bottom: 1px;
+}
+
+.flex-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.checkbox-input {
+    display: inline-flex;
+    align-items: center;
+}
+
+.custom-checkbox-row {
+    margin-bottom: 2px;
+    padding: 0;
+}
+
+.asterisk-placeholder {
+    visibility: hidden;
+}
+
+.interaction-name-display {
+    background-color: #2176d2; /* Salesforce blue */
+    color: white;
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0; /* Adjusts space around the box */
+}

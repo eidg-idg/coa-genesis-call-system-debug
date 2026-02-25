@@ -1,0 +1,177 @@
+import { LightningElement, api, track } from 'lwc';
+import { createRecord } from 'lightning/uiRecordApi';
+import VERIFICATION_INFORMATION_OBJECT from '@salesforce/schema/UST_EPLUS__Verification_Information__c';
+import CSR_INTERACTION_FIELD from '@salesforce/schema/UST_EPLUS__Verification_Information__c.UST_EPLUS__CSR_Interaction__c';
+import PROVIDER_FIELD from '@salesforce/schema/UST_EPLUS__Verification_Information__c.UST_EPLUS__Healthcare_Provider__c';
+import CASE_ORIGIN_FIELD from '@salesforce/schema/UST_EPLUS__Verification_Information__c.UST_EPLUS__Case_Origin__c';
+import CALLER_NAME_FIELD from '@salesforce/schema/UST_EPLUS__Verification_Information__c.UST_EPLUS__Caller_Name__c';
+import CALLER_PHONE_FIELD from '@salesforce/schema/UST_EPLUS__Verification_Information__c.UST_EPLUS__CallerPhoneNumber__c';
+
+export default class ProviderVerificationModal extends LightningElement {
+    @api healthcareProvider;
+    @api interactionId;
+    @api interactionName;
+    @api providerId; // Add this to receive the providerId from the parent
+
+    @track checkedValues = [];
+    @track caseOriginValue = '';
+    @track isCallingOnBehalf = false;
+    @track callerName = '';
+    @track callerTypeValue = '';
+    @track callerPhoneNumber = '';
+    @track phoneExtension = '';
+
+    get caseOriginOptions() {
+        return [
+            { label: 'Inbound - Phone Call', value: 'Inbound - Phone Call' },
+            { label: 'Outbound - Phone Call', value: 'Outbound - Phone Call' },
+            { label: 'Email', value: 'Email' },
+            { label: 'Voicemail', value: 'Voicemail' },
+            { label: 'Research', value: 'Research' },
+            { label: 'Meeting - Virtual', value: 'Meeting - Virtual' },
+            { label: 'Meeting - In Person', value: 'Meeting - In Person' }
+        ];
+    }
+
+    get callerTypeOptions() {
+        return [
+            { label: 'Billing Office', value: 'Billing Office' },
+            { label: 'Provider/Clinical Office', value: 'Provider/Clinical Office' },
+            { label: 'Hospital Staff/Facility', value: 'Hospital Staff/Facility' },
+            { label: 'Other', value: 'Other' }
+        ];
+    }
+
+    get formattedPhoneNumber() {
+        const phone = this.healthcareProvider.Phone;
+        if (phone && !phone.includes('-')) {
+            return `${phone.slice(0, 3)}-${phone.slice(3, 6)}-${phone.slice(6)}`;
+        }
+        return phone;
+    }
+
+    get isAddressPresent() {
+        return this.healthcareProvider.ProviderStreet || this.healthcareProvider.ProviderCity || 
+               this.healthcareProvider.ProviderState || this.healthcareProvider.ProviderZip;
+    }
+
+    get verificationOptionsWithDisabled() {
+        const options = [
+            { label: 'NPI', value: 'NPI' },
+            { label: 'Provider Name', value: 'Name' },
+            { label: 'Phone Number', value: 'Phone' },
+            { label: 'Provider Id', value: 'ProviderId' },
+            { label: 'Provider TIN', value: 'ProviderTIN' },
+            { label: 'Provider Status', value: 'Status' },
+            { label: 'Provider Address', value: 'ProviderAddress', isAddress: true },
+        ];
+
+        const addressComponents = ['ProviderStreet', 'ProviderCity', 'ProviderState', 'ProviderZip'];
+        const isAddressComplete = addressComponents.every(component => this.healthcareProvider && this.healthcareProvider[component]);
+
+        return options.map(option => {
+            const isDataPresent = this.healthcareProvider && this.healthcareProvider[option.value];
+            const isRequired = (option.value === 'NPI' && isDataPresent) || (option.isAddress && isAddressComplete);
+            option.showAsterisk = isRequired;
+            option.cssClass = isRequired ? 'required-asterisk' : 'asterisk-placeholder';
+            return {
+                ...option,
+                disabled: option.isAddress ? !isAddressComplete : !isDataPresent
+            };
+        });
+    }
+
+    connectedCallback() {
+        console.log('HealthcareProvider data on connected:', JSON.stringify(this.healthcareProvider));
+        console.log('Provider ID from parent:', this.providerId); // Verify providerId is received
+        console.log('Interaction Name: ', this.interactionName);
+        this.showVerificationSectionImmediately();
+    }
+
+    showVerificationSectionImmediately() {
+        if (this.providerId) {
+            console.log('Extracted Provider ID:', this.providerId);
+        } else {
+            console.error('Provider ID is missing.');
+        }
+    }
+
+    handleChange(event) {
+        const { name, checked } = event.target;
+        if (checked && !this.checkedValues.includes(name)) {
+            this.checkedValues = [...this.checkedValues, name];
+        } else if (!checked && this.checkedValues.includes(name)) {
+            this.checkedValues = this.checkedValues.filter(value => value !== name);
+        }
+    }
+
+    handleCaseOriginChange(event) {
+        this.caseOriginValue = event.detail.value;
+    }
+
+    handleIsCallingOnBehalfChange(event) {
+        this.isCallingOnBehalf = event.target.checked;
+    }
+
+    handleInputChange(event) {
+        const { name, value } = event.target;
+        this[name] = value;
+    }
+
+    verify() {
+        console.log('HealthcareProvider data on verify:', JSON.stringify(this.healthcareProvider));
+        console.log('Provider ID:', this.providerId);
+        console.log('Interaction ID:', this.interactionId);
+        console.log('Interaction Name:', this.interactionName);
+        console.log('Number of checked values:', this.checkedValues.length);
+
+        if (this.checkedValues.length >= 2) { 
+            const verificationData = {
+                interactionId: this.interactionId,
+                providerId: this.providerId, // Ensure this is passed
+                caseOrigin: this.caseOriginValue,
+                callerName: this.callerName,
+                callerPhone: this.callerPhoneNumber,
+            };
+            console.log('Verification Data:', JSON.stringify(verificationData));
+
+            const closeEvent = new CustomEvent('close', {
+                detail: { verificationData }
+            });
+            this.dispatchEvent(closeEvent);
+
+            this.createVerificationRecord(verificationData);
+        } else {
+            alert("Please select at least two verification options to proceed.");
+        }
+    }
+
+    createVerificationRecord(data) {
+        const fields = {};
+        fields[CSR_INTERACTION_FIELD.fieldApiName] = data.interactionId;
+        fields[CALLER_NAME_FIELD.fieldApiName] = data.callerName;
+        fields[PROVIDER_FIELD.fieldApiName] = data.providerId; // Use the correct providerId
+        fields[CASE_ORIGIN_FIELD.fieldApiName] = data.caseOrigin;
+        fields[CALLER_PHONE_FIELD.fieldApiName] = data.callerPhone;
+
+        const recordInput = { apiName: VERIFICATION_INFORMATION_OBJECT.objectApiName, fields };
+        createRecord(recordInput)
+            .then(result => {
+                console.log('Verification Information Record Created:', result);
+                this.navigateToProviderPage(data.providerId); // Ensure correct providerId
+            })
+            .catch(error => {
+                console.error('Error creating verification information record:', error);
+                this.navigateToProviderPage(data.providerId); // Handle error and navigate
+            });
+    }
+
+    navigateToProviderPage(recordId) {
+        if (recordId) {
+            console.log('Navigating to Healthcare Provider record:', recordId);
+            window.location.href = `/${recordId}`;
+        } else {
+            console.error('No Healthcare Provider recordId found, unable to navigate.');
+        }
+    }
+}

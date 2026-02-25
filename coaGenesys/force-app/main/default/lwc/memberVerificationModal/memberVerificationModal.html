@@ -1,0 +1,142 @@
+<!-- memberVerificationModal.html -->
+<template>
+    <div class="host-container">
+        <lightning-card title="Verify Member" icon-name="custom:custom14">
+            <div class="interaction-name-display slds-m-around_medium slds-align_absolute-center">
+                <p><b>Interaction:</b> {interactionName}</p>
+            </div>
+
+            <div class="slds-m-around_medium">
+                <!-- Conditionally render dropdowns -->
+                <template if:true={showDropdowns}>
+                    <lightning-combobox name="caseOrigin"
+                                        label="Case Origin"
+                                        value={caseOriginValue}
+                                        options={caseOriginOptions}
+                                        onchange={handleCaseOriginChange}>
+                    </lightning-combobox>
+
+                    <lightning-combobox name="memberType"
+                                        label="Member Type"
+                                        value={memberTypeValue}
+                                        options={memberTypeOptions}
+                                        onchange={handleMemberTypeChange}>
+                    </lightning-combobox>
+                </template>
+
+                <!-- Verification Section, shown after dropdown selections are made -->
+                <template if:true={showVerificationSection}>
+                    <div class="slds-grid slds-wrap">
+                        <!-- Left Column for Checkboxes -->
+                        <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
+                            <template for:each={verificationOptionsWithDisabled} for:item="option">
+                                <div key={option.value} class="slds-grid slds-align-center custom-checkbox-row">
+                                    <!-- Flex container for asterisk and checkbox -->
+                                    <div class="flex-container">
+                                        <!-- Conditionally render asterisk only when required -->
+                                        <template if:true={option.showAsterisk}>
+                                            <span class="required-asterisk" aria-hidden="true">*</span>
+                                        </template>
+                                        <!-- Placeholder for alignment if no asterisk is required -->
+                                        <template if:false={option.showAsterisk}>
+                                            <span class="asterisk-placeholder" aria-hidden="true"> </span>
+                                        </template>
+                                        <lightning-input type="checkbox"
+                                                        label={option.label}
+                                                        name={option.value}
+                                                        disabled={option.disabled}
+                                                        onchange={handleChange}
+                                                        class="checkbox-input"></lightning-input>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <!-- Right Column for Data Fields -->
+                        <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
+                            <p><b>Member Id:</b> {account.MemberID}</p>
+                            <p><b>SSN:</b> {account.ssn}</p>
+                            <p><b>Member Name:</b> {account.Name}</p>
+                            <p><b>DOB:</b> {formattedDateOfBirth}</p>
+                            <p><b>Phone:</b> {formattedPhoneNumber}</p>
+                            <div>
+                                <p><b>Mailing Address:</b></p>
+                                <pre>{fullMailingAddress}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Representative Details Section -->
+                <template if:true={showRepresentativeDetails}>
+                    <div class="slds-m-around_medium">
+                        <lightning-combobox name="representativeType"
+                                            label="Representative Type"
+                                            value={representativeTypeValue}
+                                            options={representativeTypeOptions}
+                                            onchange={handleRepresentativeTypeChange}>
+                        </lightning-combobox>
+                    </div>
+                
+                    <!-- Relationship Type Dropdown, shown for Personal Representative -->
+                    <template if:true={showRelationshipType}>
+                        <div class="slds-m-around_medium">
+                            <lightning-combobox name="relationshipType"
+                                                label="Relationship Type"
+                                                value={relationshipTypeValue}
+                                                options={relationshipTypeOptions}
+                                                onchange={handleRelationshipTypeChange}>
+                            </lightning-combobox>
+                        </div>
+                    </template>
+                </template>
+
+                <!-- Additional Fields Section -->
+                <template if:true={showAdditionalFields}>
+                    <div class="slds-m-around_medium">
+                        <lightning-input label="Name"
+                                         name="name"
+                                         value={nameValue}
+                                         onchange={handleNameChange}>
+                        </lightning-input>
+
+                        <lightning-input label="Caller Phone"
+                                         name="callerPhone"
+                                         value={callerPhoneValue}
+                                         onchange={handleCallerPhoneChange}>
+                        </lightning-input>
+
+                        <lightning-textarea label="Description"
+                                            name="description"
+                                            value={descriptionValue}
+                                            onchange={handleDescriptionChange}
+                                            rows="3">
+                        </lightning-textarea>
+                    </div>
+                </template>
+
+                <!-- Center the button at the bottom -->
+                <div class="slds-grid slds-grid_align-center slds-m-top_medium">
+                    <lightning-button label="Verify" variant="brand" onclick={verify}></lightning-button>
+                </div>
+            </div>
+        </lightning-card>
+    </div>
+
+    <!-- Modal Structure remains the same -->
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" aria-modal="true" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Verify Member Information</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <c-member-verification-modal account={account} onclose={handleModalClose} onverified={handleMemberVerified}></c-member-verification-modal>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Cancel" title="Cancel" onclick={handleModalClose}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

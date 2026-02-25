@@ -1,0 +1,68 @@
+<template>
+    <template if:true={formattedProviders}>
+        <div class="table-container">
+            <lightning-layout multiple-rows>
+                <lightning-layout-item size="12">
+                    <div class="slds-grid slds-wrap slds-grid_vertical-align-center slds-grid_align-spread header-row">
+                        <div class="slds-col slds-size_2-of-12 slds-text-title_bold">Name</div>
+                        <div class="slds-col slds-size_1-of-12 slds-text-title_bold">Provider ID</div>
+                        <div class="slds-col slds-size_1-of-12 slds-text-title_bold">Provider TIN</div>
+                        <div class="slds-col slds-size_1-of-12 slds-text-title_bold">NPI</div>
+                        <div class="slds-col slds-size_1-of-12 slds-text-title_bold">Status</div>
+                        <div class="slds-col slds-size_2-of-12 slds-text-title_bold">Address</div>
+                        <div class="slds-col slds-size_1-of-12 slds-text-title_bold">Phone</div>
+                        <div class="slds-col slds-size_1-of-12"></div> <!-- Placeholder for button alignment -->
+                    </div>
+                </lightning-layout-item>
+                <template for:each={formattedProviders} for:item="provider">
+                    <lightning-layout-item key={provider.Id} size="12">
+                        <div class="slds-grid slds-wrap slds-grid_vertical-align-center slds-grid_align-spread provider-row">
+                            <div class="slds-col slds-size_2-of-12">{provider.Name}</div>
+                            <div class="slds-col slds-size_1-of-12">{provider.ProviderId}</div>
+                            <div class="slds-col slds-size_1-of-12">{provider.ProviderTIN}</div>
+                            <div class="slds-col slds-size_1-of-12">{provider.NPI}</div>
+                            <div class="slds-col slds-size_1-of-12">{provider.Status}</div>
+                            <div class="slds-col slds-size_2-of-12">
+                                {provider.ProviderStreet}, 
+                                {provider.ProviderCity}, 
+                                {provider.ProviderState}, 
+                                {provider.ProviderPostalCode}
+                            </div>
+                            <div class="slds-col slds-size_1-of-12">{provider.formattedPhone}</div>
+                            <div class="slds-col slds-size_1-of-12">
+                                <lightning-button label="Verify Provider" data-id={provider.recordId} onclick={handleProviderClick} variant="brand"></lightning-button>
+                            </div>
+                        </div>
+                    </lightning-layout-item>
+                </template>
+            </lightning-layout>
+        </div>
+    </template>
+    <template if:false={formattedProviders.length}>
+        <p>No records found.</p>
+    </template>
+
+    <!-- Modal display logic -->
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" aria-modal="true" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- Modal header -->
+                <header class="slds-modal__header">
+                    <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Provider Verification</h2>
+                </header>
+                <!-- Modal content -->
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <c-provider-verification-modal 
+                        healthcare-provider={selectedProvider} 
+                        onclose={handleModalClose}>
+                    </c-provider-verification-modal>
+                </div>
+                <!-- Modal footer -->
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Close" title="Close" onclick={handleModalClose}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

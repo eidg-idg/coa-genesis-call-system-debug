@@ -1,0 +1,69 @@
+<!-- verifyMember.html -->
+<template>
+    <template if:true={formattedAccounts}>
+        <div class="table-container">
+            <lightning-layout multiple-rows>
+                <lightning-layout-item size="12">
+                    <div class="slds-grid slds-wrap slds-grid_vertical-align-center slds-grid_align-spread header-row">
+                        <div class="slds-col slds-size_2-of-12 slds-text-title_bold">Name</div>
+                        <div class="slds-col slds-size_1-of-12 slds-text-title_bold">Phone</div>
+                        <div class="slds-col slds-size_1-of-12 slds-text-title_bold">Member Last 4 SSN</div>
+                        <div class="slds-col slds-size_1-of-12 slds-text-title_bold">Member ID</div>
+                        <div class="slds-col slds-size_1-of-12 slds-text-title_bold">Date of Birth</div>
+                        <div class="slds-col slds-size_3-of-12 slds-text-title_bold">Mailing Address</div>
+                        <div class="slds-col slds-size_1-of-12"></div> <!-- Placeholder for button alignment -->
+                    </div>
+                </lightning-layout-item>
+                <template for:each={formattedAccounts} for:item="account">
+                    <lightning-layout-item key={account.Id} size="12">
+                        <div class="slds-grid slds-wrap slds-grid_vertical-align-center slds-grid_align-spread account-row">
+                            <div class="slds-col slds-size_2-of-12">{account.Name}</div>
+                            <div class="slds-col slds-size_1-of-12">{account.formattedPhone}</div>
+                            <div class="slds-col slds-size_1-of-12">{account.Last4SSN}</div>
+                            <div class="slds-col slds-size_1-of-12">{account.MemberID}</div>
+                            <div class="slds-col slds-size_1-of-12">{account.formattedDOB}</div>
+                            <div class="slds-col slds-size_3-of-12">
+                                {account.MailingStreet}, 
+                                {account.MailingCity}, 
+                                {account.MailingState}, 
+                                {account.MailingPostalCode}
+                            </div>
+                            <div class="slds-col slds-size_1-of-12">
+                                <lightning-button label="Verify Member" data-id={account.recordId} onclick={handleMemberClick} variant="brand"></lightning-button>
+                            </div>
+                        </div>
+                    </lightning-layout-item>
+                </template>
+            </lightning-layout>
+        </div>
+    </template>
+    <template if:false={formattedAccounts.length}>
+        <p>No records found.</p>
+    </template>
+
+    <!-- Modal display logic -->
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" aria-modal="true" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- Modal header -->
+                <header class="slds-modal__header">
+                    <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Member Verification</h2>
+                </header>
+                <!-- Modal content -->
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <c-member-verification-modal 
+                        account={selectedAccount} 
+                        interaction-id={interactionRecordId}
+                        interaction-name={interactionName}
+                        onclose={handleModalClose}>
+                    </c-member-verification-modal>
+                </div>
+                <!-- Modal footer -->
+                <footer class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Close" title="Close" onclick={handleModalClose}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

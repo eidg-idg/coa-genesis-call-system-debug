@@ -1,0 +1,44 @@
+<!-- VerifyMemberVisualforcePage -->
+<apex:page controller="GC_Account_PageController">
+    <apex:includeLightning />
+    
+    <!-- Container for the LWC -->
+    <div id="lwcContainer"></div>
+    
+    <script>
+    $Lightning.use("c:MyLWCApp", function() {
+        var records = [];
+    
+        // Directly parse the JSON string provided by Apex
+        var fetchedRecords = JSON.parse('{!fetchedRecordsJson}');
+    
+        // Populate records array with fetched account data
+        fetchedRecords.forEach(function(account) {
+            records.push({
+                recordId: account.Id,
+                Name: account.Name,
+                Phone: account.Phone,
+                MemberID: account.UST_EPLUS__Member_ID__c,
+                DateOfBirth: account.HealthCloudGA__BirthDate__pc,
+                ssn: account.UST_EPLUS__SSN_Masked__c,
+                MailingStreet: account.PersonMailingStreet,
+                MailingCity: account.PersonMailingCity,
+                MailingState: account.PersonMailingState,
+                MailingPostalCode: account.PersonMailingPostalCode,
+                MailingCountry: account.PersonMailingCountry,
+                Last4SSN: account.Last_4_SSN_V2__c // Added July 17, 2024 to accomodate enhancing the data on the results page LWC
+            });
+        });
+    
+        // Create the LWC component and add it to the DOM
+        $Lightning.createComponent(
+            "c:verifyMember",
+            { accounts: records },
+            "lwcContainer",
+            function(component) {
+                console.log("LWC 'verifyMember' has been created successfully.");
+            }
+        );
+    });
+    </script>
+</apex:page>

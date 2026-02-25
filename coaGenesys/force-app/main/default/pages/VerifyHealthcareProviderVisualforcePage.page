@@ -1,0 +1,46 @@
+<!-- VerifyHealthcareProviderVisualforcePage -->
+
+<apex:page controller="GC_HealthcareProvider_PageController">
+    <apex:includeLightning />
+
+    <!-- Container for the LWC -->
+    <div id="lwcContainer"></div>
+
+    <script>
+    $Lightning.use("c:MyProviderLWCApp", function() {
+        
+        // Create variable to hold an array
+        var records = [];
+        
+        // Directly parse the JSON string provide by Apex
+        var fetchedRecords = JSON.parse('{!fetchedRecordsJson}');
+        
+        // Populate records array with fetched account data
+        fetchedRecords.forEach(function(healthcareProvider) {
+            records.push({
+            	recordId: healthcareProvider.Id,
+            	Name: healthcareProvider.Name,
+            	ProviderId: healthcareProvider.UST_EPLUS__Provider_ID__c,
+            	ProviderTIN: healthcareProvider.UST_EPLUS__Provider_Tax_ID__c,
+            	NPI: healthcareProvider.UST_EPLUS__Provider_NPI__c,
+            	Status: healthcareProvider.UST_EPLUS__Provider_Status__c,
+            	ProviderStreet: healthcareProvider.UST_EPLUS__Practice_Street_Address__c,
+            	ProviderCity: healthcareProvider.UST_EPLUS__Practice_City__c,
+            	ProviderState: healthcareProvider.UST_EPLUS__Practice_State__c,
+            	ProviderZip: healthcareProvider.UST_EPLUS__Practice_ZIP_Code__c,
+            	Phone: healthcareProvider.UST_EPLUS__Primary_Phone_Number__c
+            });
+            
+        });
+
+        $Lightning.createComponent(
+            "c:verifyProvider",
+            { providers: records },
+            "lwcContainer",
+            function(component) {
+                console.log("LWC 'verifyProvider' has been created successfully.");
+            }
+        );
+    });
+    </script>
+</apex:page>

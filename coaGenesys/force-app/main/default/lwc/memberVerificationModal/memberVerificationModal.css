@@ -1,0 +1,55 @@
+/* memberVerificationModal.css */
+.interaction-name-display {
+    background-color: #2176d2; /* Salesforce blue */
+    color: white;
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0; /* Adjusts space around the box */
+}
+
+pre {
+    font-family: inherit; /* Makes the font consistent with the rest of the application */
+    white-space: pre-wrap; /* Allows long lines to wrap */
+    word-wrap: break-word; /* Ensures words can break and wrap to the next line */
+    margin: 0; /* Removes default margin */
+}
+
+.required-asterisk, .asterisk-placeholder {
+    width: 10px;
+    text-align: center;
+    color: red;
+}
+
+.slds-col_bump-right {
+    margin-right: 10px; /* Adjust as needed */
+}
+
+.slds-align-center {
+    margin-bottom: 1px;
+}
+
+.checkbox-input {
+    display: inline-flex;
+    align-items: center;
+}
+
+.custom-checkbox-row {
+    margin-bottom: 2px; /* Reduces vertical space between each checkbox */
+    padding: 0; /* Removes default padding */
+}
+
+.flex-container {
+    display: flex;        /* Use flex layout */
+    align-items: center;  /* Align items vertically in the center */
+    gap: 4px;             /* Space between asterisk and checkbox */
+}
+
+.checkbox-input {
+    display: inline-flex; /* Makes sure input itself is properly aligned */
+    align-items: center;  /* Centers the checkbox vertically */
+}
+
+.asterisk-placeholder {
+    visibility: hidden; /* Hides the asterisk */
+}

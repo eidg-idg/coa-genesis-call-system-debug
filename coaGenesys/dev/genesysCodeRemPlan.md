@@ -8,6 +8,28 @@
 
 **Line number note:** Line numbers are provided as approximate navigation aids. The exact code snippets are the authoritative matching reference. After applying early steps, later line numbers in the same file will shift. Always match on the code snippet, not the line number.
 
+## Implementation workflow (PRs + SFDX sandbox)
+
+This work is intended to be implemented in a sandbox via SFDX. Production deployment can be managed separately using the same commit SHAs/PRs.
+
+### Recommended PR plan (supervisor approvals as you go)
+
+1. **PR 1 — Phase 1 (core behavior fixes)**
+   - LWC save-before-close ordering
+   - Always-visible caller identity fields
+   - `verifyProvider` provider data passing fix
+   - Case Origin required for provider verification
+   - ANI pass-through (Genesys -> VF -> LWC -> saved record)
+2. **PR 2 — Phase 2 improvements (excluding Step 2.4)**
+   - try/catch hardening, explicit sharing, VF controller exception handling, combobox handler fix, remove dead template, etc.
+3. **PR 3 — Step 2.4 trigger work (separate PR / separate deploy)**
+   - Replace hardcoded RecordType IDs and related test updates
+
+### Sandbox deployment note (SFDX)
+
+- Deploy in the sandbox after each PR merge to keep validation scope small.
+- Run tests as required by your org/pipeline (commonly `RunLocalTests` or `RunSpecifiedTests` for the changed test classes referenced in this plan).
+
 ---
 
 ## Locked Decisions

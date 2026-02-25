@@ -5,11 +5,11 @@ import INTERACTION_OBJECT from '@salesforce/schema/UST_EPLUS__Interaction__c';
 export default class VerifyMember extends LightningElement {
     @api accounts = [];
     @api callerANI = '';
-    @track isModalOpen = false;
-    @track selectedAccountId = null;
-    @track interactionRecordId = null;
-    @track interactionName = null;
-    @track verificationData = {}; // To store temporary verification data
+    isModalOpen = false;
+    selectedAccountId = null;
+    interactionRecordId = null;
+    interactionName = null;
+    @track verificationData = {};
 
     connectedCallback() {
         console.log('Connected Callback: Checking Accounts Data');

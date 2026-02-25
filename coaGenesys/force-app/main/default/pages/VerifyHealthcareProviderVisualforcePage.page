@@ -13,7 +13,7 @@
         var records = [];
         
         // Directly parse the JSON string provide by Apex
-        var fetchedRecords = JSON.parse('{!fetchedRecordsJson}');
+        var fetchedRecords = JSON.parse('{!JSENCODE(fetchedRecordsJson)}');
         
         // Populate records array with fetched account data
         fetchedRecords.forEach(function(healthcareProvider) {

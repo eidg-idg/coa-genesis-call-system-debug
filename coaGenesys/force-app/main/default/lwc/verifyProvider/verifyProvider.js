@@ -1,14 +1,14 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api } from 'lwc';
 import { createRecord } from 'lightning/uiRecordApi';
 import INTERACTION_OBJECT from '@salesforce/schema/UST_EPLUS__Interaction__c';
 
 export default class VerifyProvider extends LightningElement {
     @api providers = []; // Array of healthcare providers passed from Visualforce
     @api callerANI = '';
-    @track isModalOpen = false;
-    @track selectedProviderId = null;
-    @track interactionRecordId = null;
-    @track interactionName = null;
+    isModalOpen = false;
+    selectedProviderId = null;
+    interactionRecordId = null;
+    interactionName = null;
 
     // Getter to return providers with formatted phone numbers
     get formattedProviders() {

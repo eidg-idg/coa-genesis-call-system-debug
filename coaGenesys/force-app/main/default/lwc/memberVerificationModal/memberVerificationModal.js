@@ -13,22 +13,22 @@ export default class MemberVerificationModal extends LightningElement {
     @api interactionId;
     @api interactionName;
     @api callerANI = '';
-    @track checkedValues = []; // Tracks the values of checked checkboxes.
-    @track masterAccountId = ''; // Stores the extracted recordId from the account data.
-    @track showDropdowns = true; // Controls the initial display of the dropdowns.
-    @track showVerificationSection = false; // Controls the display of the verification section after selections.
-    @track caseOriginValue = ''; // Stores the selected Case Origin value.
-    @track memberTypeValue = ''; // Stores the selected Member Type value.
-    @track representativeTypeValue = ''; // New: Stores the selected Representative Type value.
-    @track relationshipTypeValue = ''; // New: Stores the selected Relationship Type value.
-    @track showRepresentativeDetails = false; // New: Controls the display of the Representative Details section.
-    @track showRelationshipType = false; // New: Controls the display of the Relationship Type dropdown.
-    @track showAdditionalFields = false; // New: Controls the display of the additional fields section.
-    @track nameValue = ''; // New: Stores the entered Name value.
-    @track callerPhoneValue = ''; // New: Stores the entered Caller Phone value.
-    @track descriptionValue = ''; // New: Stores the entered Description value.
-    @track isSaving = false;
-    @track errorMessage = '';
+    @track checkedValues = [];
+    masterAccountId = '';
+    showDropdowns = true;
+    showVerificationSection = false;
+    caseOriginValue = '';
+    memberTypeValue = '';
+    representativeTypeValue = '';
+    relationshipTypeValue = '';
+    showRepresentativeDetails = false;
+    showRelationshipType = false;
+    showAdditionalFields = false;
+    nameValue = '';
+    callerPhoneValue = '';
+    descriptionValue = '';
+    isSaving = false;
+    errorMessage = '';
 
     get caseOriginOptions() {
         return [

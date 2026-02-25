@@ -103,7 +103,8 @@ global class GenesysCTIExtensionClassV2 implements purecloud.CTIExtension.Screen
         // If Accounts are found, navigate to the Visualforce page
         if (!orderedAccountIds.isEmpty()) {
             String accountIdsJson = JSON.serialize(orderedAccountIds);
-            String vfPageURL = '/apex/VerifyMemberVisualforcePage?ids=' + EncodingUtil.urlEncode(accountIdsJson, 'UTF-8');
+            String aniParam = (searchValue != null) ? '&ani=' + EncodingUtil.urlEncode(searchValue, 'UTF-8') : '';
+            String vfPageURL = '/apex/VerifyMemberVisualforcePage?ids=' + EncodingUtil.urlEncode(accountIdsJson, 'UTF-8') + aniParam;
             System.debug('Navigating to Visualforce page with URL: ' + vfPageURL);
             
             dataToReturn.put('url', vfPageURL);
@@ -163,7 +164,8 @@ global class GenesysCTIExtensionClassV2 implements purecloud.CTIExtension.Screen
         // If Healthcare Providers are found, navigate to the Visualforce page
         if (!orderedHCPIds.isEmpty()) {
             String hcpIdsJson = JSON.serialize(orderedHCPIds);
-            String vfPageURL = '/apex/VerifyHealthcareProviderVisualforcePage?ids=' + EncodingUtil.urlEncode(hcpIdsJson, 'UTF-8');
+            String aniParam = (searchValue != null) ? '&ani=' + EncodingUtil.urlEncode(searchValue, 'UTF-8') : '';
+            String vfPageURL = '/apex/VerifyHealthcareProviderVisualforcePage?ids=' + EncodingUtil.urlEncode(hcpIdsJson, 'UTF-8') + aniParam;
             System.debug('Navigating to Visualforce page with URL: ' + vfPageURL);
             
             dataToReturn.put('url', vfPageURL);

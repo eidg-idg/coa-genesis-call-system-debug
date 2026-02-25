@@ -13,6 +13,7 @@
                                         label="Case Origin"
                                         value={caseOriginValue}
                                         options={caseOriginOptions}
+                                        required
                                         onchange={handleCaseOriginChange}>
                     </lightning-combobox>
                 </div>
@@ -61,6 +62,21 @@
                     </div>
                 </div>
 
+                <!-- Caller Information - always visible -->
+                <div class="slds-m-around_medium">
+                    <lightning-input type="text"
+                                    label="Caller Name"
+                                    name="callerName"
+                                    value={callerName}
+                                    required
+                                    onchange={handleInputChange}></lightning-input>
+                    <lightning-input type="text"
+                                    label="Phone Number"
+                                    name="callerPhoneNumber"
+                                    value={callerPhoneNumber}
+                                    onchange={handleInputChange}></lightning-input>
+                </div>
+
                 <!-- Are you calling on behalf of a Provider? Checkbox -->
                 <div class="slds-grid slds-grid_align-center slds-m-top_medium">
                     <lightning-input type="checkbox"
@@ -68,26 +84,16 @@
                                      checked={isCallingOnBehalf}
                                      onchange={handleIsCallingOnBehalfChange}></lightning-input>
                 </div>
-                
-                <!-- Conditional Additional Fields -->
+
+                <!-- Conditional Additional Fields (delegation-specific) -->
                 <template if:true={isCallingOnBehalf}>
                     <div class="slds-grid slds-gutters">
                         <div class="slds-col slds-size_1-of-1 slds-p-horizontal_small">
-                            <lightning-input type="text"
-                                            label="Caller Name"
-                                            name="callerName"
-                                            value={callerName}
-                                            onchange={handleInputChange}></lightning-input>
                             <lightning-combobox name="callerType"
                                                 label="Caller Type"
                                                 value={callerTypeValue}
                                                 options={callerTypeOptions}
-                                                onchange={handleInputChange}></lightning-combobox>
-                            <lightning-input type="text"
-                                            label="Phone Number"
-                                            name="callerPhoneNumber"
-                                            value={callerPhoneNumber}
-                                            onchange={handleInputChange}></lightning-input>
+                                                onchange={handleCallerTypeChange}></lightning-combobox>
                             <lightning-input type="text"
                                             label="Phone Extension"
                                             name="phoneExtension"
@@ -97,9 +103,16 @@
                     </div>
                 </template>
 
+                <!-- Error message display -->
+                <template if:true={errorMessage}>
+                    <div class="slds-notify slds-notify_alert slds-alert_warning slds-m-around_medium" role="alert">
+                        <span>{errorMessage}</span>
+                    </div>
+                </template>
+
                 <!-- Verification Button -->
                 <div class="slds-grid slds-grid_align-center slds-m-top_medium">
-                    <lightning-button label="Verify" variant="brand" onclick={verify}></lightning-button>
+                    <lightning-button label={verifyButtonLabel} variant="brand" onclick={verify} disabled={isSaving}></lightning-button>
                 </div>
             </div>
         </lightning-card>

@@ -4,6 +4,7 @@ import INTERACTION_OBJECT from '@salesforce/schema/UST_EPLUS__Interaction__c';
 
 export default class VerifyMember extends LightningElement {
     @api accounts = [];
+    @api callerANI = '';
     @track isModalOpen = false;
     @track selectedAccountId = null;
     @track interactionRecordId = null;

@@ -12,6 +12,7 @@ export default class MemberVerificationModal extends LightningElement {
     @api account; // The data block containing the account recordId.
     @api interactionId;
     @api interactionName;
+    @api callerANI = '';
     @track checkedValues = []; // Tracks the values of checked checkboxes.
     @track masterAccountId = ''; // Stores the extracted recordId from the account data.
     @track showDropdowns = true; // Controls the initial display of the dropdowns.
@@ -26,6 +27,8 @@ export default class MemberVerificationModal extends LightningElement {
     @track nameValue = ''; // New: Stores the entered Name value.
     @track callerPhoneValue = ''; // New: Stores the entered Caller Phone value.
     @track descriptionValue = ''; // New: Stores the entered Description value.
+    @track isSaving = false;
+    @track errorMessage = '';
 
     get caseOriginOptions() {
         return [
@@ -91,6 +94,10 @@ export default class MemberVerificationModal extends LightningElement {
         ];
     }
 
+    get verifyButtonLabel() {
+        return this.isSaving ? 'Saving...' : 'Verify';
+    }
+
     get verificationOptionsWithDisabled() {
         const options = [
             { label: 'Member ID', value: 'MemberID' },
@@ -132,7 +139,10 @@ export default class MemberVerificationModal extends LightningElement {
 
     connectedCallback() {
         console.log('Account data on connected:', JSON.stringify(this.account));
-        console.log('Interaction Name: ', this.interactionName );
+        console.log('Interaction Name: ', this.interactionName);
+        if (this.callerANI && !this.callerPhoneValue) {
+            this.callerPhoneValue = this.callerANI;
+        }
     }
 
     handleCaseOriginChange(event) {
@@ -193,30 +203,32 @@ export default class MemberVerificationModal extends LightningElement {
             console.log('Test Master Account ID:', this.masterAccountId);
             console.log(this.checkedValues.length);
 
+            // Validate caller name is provided
+            if (!this.nameValue || this.nameValue.trim() === '') {
+                this.errorMessage = 'Caller Name is required.';
+                return;
+            }
+
             if (this.checkedValues.length >= 3) {
                 const verificationData = {
                     interactionId: this.interactionId,
                     callerName: this.nameValue,
                     accountId: this.masterAccountId,
-                    caseOrigin: this.caseOriginValue, // Added field
-                    representativeType: this.representativeTypeValue, // Added field
-                    callerPhone: this.callerPhoneValue, // Added field
+                    caseOrigin: this.caseOriginValue,
+                    representativeType: this.representativeTypeValue,
+                    callerPhone: this.callerPhoneValue,
                 };
                 console.log('Verification Data:', JSON.stringify(verificationData));
-                
-                // Dispatch event to parent with verification data
-                const closeEvent = new CustomEvent('close', {
-                    detail: { verificationData }
-                });
-                this.dispatchEvent(closeEvent);
 
+                this.isSaving = true;
+                this.errorMessage = '';
                 this.createVerificationRecord(verificationData);
             } else {
-                alert("I'm sorry, the member could not be verified.");
+                this.errorMessage = "I'm sorry, the member could not be verified. Please select at least three verification items.";
             }
         } else {
             console.error('No recordId found in account data.');
-            alert("I'm sorry, the member could not be verified.");
+            this.errorMessage = "I'm sorry, the member could not be verified.";
         }
     }
 
@@ -241,19 +253,25 @@ export default class MemberVerificationModal extends LightningElement {
         fields[CSR_INTERACTION_FIELD.fieldApiName] = data.interactionId;
         fields[CALLER_NAME_FIELD.fieldApiName] = data.callerName;
         fields[MEMBER_FIELD.fieldApiName] = data.accountId;
-        fields[CASE_ORIGIN_FIELD.fieldApiName] = data.caseOrigin; // Added field
-        fields[CALLER_RELATIONSHIP_TO_MEMBER_FIELD.fieldApiName] = data.representativeType; // Added field
-        fields[CALLER_PHONE_FIELD.fieldApiName] = data.callerPhone; // Added field
+        fields[CASE_ORIGIN_FIELD.fieldApiName] = data.caseOrigin;
+        fields[CALLER_RELATIONSHIP_TO_MEMBER_FIELD.fieldApiName] = data.representativeType;
+        fields[CALLER_PHONE_FIELD.fieldApiName] = data.callerPhone;
 
         const recordInput = { apiName: VERIFICATION_INFORMATION_OBJECT.objectApiName, fields };
         createRecord(recordInput)
             .then(result => {
                 console.log('Verification Information Record Created:', result);
+                this.isSaving = false;
+                const closeEvent = new CustomEvent('close', {
+                    detail: { verificationData: data }
+                });
+                this.dispatchEvent(closeEvent);
                 this.navigateToAccountPage(data.accountId);
             })
             .catch(error => {
                 console.error('Error creating verification information record:', error);
-                this.navigateToAccountPage(data.accountId);
+                this.isSaving = false;
+                this.errorMessage = 'Verification record could not be saved. Please try again.';
             });
     }
 

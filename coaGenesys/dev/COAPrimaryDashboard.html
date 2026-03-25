@@ -1020,6 +1020,59 @@
       }
     });
   }
+
+  /* ── DECISION SELECTION ── */
+  const DECISION_LABELS = {
+    cd01: { A: 'Option A — Full Parity', B: 'Option B — Optional Capture', C: 'Option C — Always Required' },
+    cd02: { A: 'Option A — Remove',      B: 'Option B — Keep as EIDG Add' },
+    cd03: { A: 'Option A — Full EPlus Parity', B: 'Option B — Partial Match', C: 'Option C — Keep Description' }
+  };
+
+  function selectOption(card) {
+    const cd  = card.getAttribute('data-cd');
+    const opt = card.getAttribute('data-opt');
+    // Toggle: clicking the already-selected card deselects it
+    const alreadySelected = card.classList.contains('selected');
+    document.querySelectorAll(`.option-card[data-cd="${cd}"]`).forEach(c => c.classList.remove('selected'));
+    if (!alreadySelected) {
+      card.classList.add('selected');
+      localStorage.setItem('decision_' + cd, opt);
+      setStatusResolved(cd, opt);
+    } else {
+      localStorage.removeItem('decision_' + cd);
+      resetStatus(cd);
+    }
+  }
+
+  function setStatusResolved(cd, opt) {
+    const el = document.getElementById('status-' + cd);
+    if (!el) return;
+    el.textContent = '✅ Decision: ' + (DECISION_LABELS[cd][opt] || opt);
+    el.classList.add('resolved');
+  }
+
+  function resetStatus(cd) {
+    const el = document.getElementById('status-' + cd);
+    if (!el) return;
+    el.classList.remove('resolved');
+    const defaults = {
+      cd01: '🔴 Required before Provider work begins',
+      cd02: '🔴 Can be decided independently',
+      cd03: '🟡 Lower urgency — affects Body 2 scope significantly'
+    };
+    el.textContent = defaults[cd] || 'Pending';
+  }
+
+  function loadDecisions() {
+    ['cd01', 'cd02', 'cd03'].forEach(cd => {
+      const saved = localStorage.getItem('decision_' + cd);
+      if (!saved) return;
+      const card = document.querySelector(`.option-card[data-cd="${cd}"][data-opt="${saved}"]`);
+      if (card) { card.classList.add('selected'); setStatusResolved(cd, saved); }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', loadDecisions);
 </script>
 </body>
 </html>

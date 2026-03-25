@@ -138,6 +138,8 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
    }
    ```
 
+   **Note:** `createVerificationRecord()` reads field values from the `data` parameter, not from component state like `this.checkedValues`. No checkbox fields are written to the record. However, ensure that `createVerificationRecord()` does not reference any checkbox-derived state — if future changes add checkbox persistence, pass `checkedValues: []` explicitly.
+
 6. **Update `checkSelectionsAndDisplayVerification()`** at `memberVerificationModal.js` line 181–186 to only advance for phone origins:
 
    ```js
@@ -275,7 +277,7 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
    get phoneTelLink() {
        if (this.account && this.account.Phone) {
            const digits = this.account.Phone.replace(/\D/g, '');
-           return `tel:+1${digits}`;
+           return digits.length >= 10 ? `tel:+1${digits}` : '#';
        }
        return '#';
    }
@@ -301,7 +303,7 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
 
 ---
 
-### A-6. Phone Number Format: M/D/YYYY (No Zero-Padding)
+### A-6. Date of Birth Format: M/D/YYYY (No Zero-Padding)
 
 **RE doc ref:** M-P2-06
 **Priority:** LOW
@@ -877,6 +879,7 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
        if (!this.isPhoneOrigin) {
            this.checkedValues = [];
            this.isCallingOnBehalf = false;
+           this.errorMessage = '';
        }
    }
    ```
@@ -962,7 +965,7 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
    get phoneTelLink() {
        if (this.healthcareProvider && this.healthcareProvider.Phone) {
            const digits = this.healthcareProvider.Phone.replace(/\D/g, '');
-           return `tel:+1${digits}`;
+           return digits.length >= 10 ? `tel:+1${digits}` : '#';
        }
        return '#';
    }

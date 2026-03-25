@@ -283,9 +283,9 @@ This has scope implications: replicating this behavior in our LWC would require 
 - Verify button visible from the moment phase 2 renders — even with zero checkboxes checked.
 - Cancel button also always visible alongside Verify.
 - Inline validation fires on the `* Parent` lookup field when Verify is clicked without a selection: **"Complete this field."** (red text beneath the field).
-- Minimum checkbox count for successful verification: **🔲 PENDING** — requires sandbox testing (try Verify with 0, 1, 2 checkboxes).
+- Minimum checkbox count for successful verification: **🔲 PENDING** — requires sandbox testing (try Verify with 0, 1, 2 checkboxes). **Current Genesys LWC enforces ≥ 3 checkboxes** (`memberVerificationModal.js` line ~212). If EPlus requires a different count, this is a high-impact gap.
 - Success behavior after Verify: **🔲 PENDING** — does modal close? Does page navigate? Toast message?
-- Error behavior for insufficient checkboxes: **🔲 PENDING**
+- Error behavior for insufficient checkboxes: **🔲 PENDING** — EPlus error message text and inline vs. banner validation style unknown.
 
 ---
 
@@ -351,7 +351,7 @@ The EPlus Provider Verification modal has a distinct layout from the Member moda
 - Unlike the Member modal, there is **no Go Back button**. Provider uses `× Cancel` (blue) and X close (top-right) for dismissal.
 - The `Case Origin *` asterisk position is **after** the label text in Provider, whereas Member uses `* Case Origin` (asterisk before, via the SLDS `required` pattern). This is a visual difference in EPlus itself between the two modals.
 - Provider has **no phase 1 / phase 2 split**. Case Origin and all other fields are visible in the same single view.
-- ⚠️ **PENDING — "Provider Details" section header:** The Member modal uses a `Member Details` section header (bold + ⓘ icon) above the checkbox group. Screenshots of the Provider modal do not clearly confirm whether an equivalent `Provider Details` (or similar) header exists above the verification checkboxes. This should be confirmed from a sandbox screenshot before implementing. Gap reference: **P-17** (see §3.3).
+- ✅ **CONFIRMED — No "Provider Details" section header:** The Member modal uses a `Member Details` section header (bold + ⓘ icon) above the checkbox group. The Provider modal has **no equivalent section header** — checkboxes appear directly below the Case Origin dropdown without any header. Confirmed from sandbox screenshot (2026-03-25). Our LWC should **not** add a section header for Provider. See §3.3 P-17.
 
 ---
 
@@ -436,7 +436,7 @@ Four additional fields appear immediately below the checkbox:
 | # | Field Label | Type | Required | Default | Notes |
 |---|---|---|---|---|---|
 | 1 | `* Caller Name:` | Text input | **Yes** (red asterisk) | Empty | Free text |
-| 2 | `Caller Type` | Combobox | No | `--None--` | Options: ⚠️ PENDING — dropdown not opened in screenshots |
+| 2 | `Caller Type` | Combobox | No | `--None--` | Options: ⚠️ PENDING — specific dropdown options not yet captured. **Confirmed (2026-03-25): selecting a Caller Type value does not trigger any additional conditional rendering.** It is a data capture field only. |
 | 3 | `Phone Number:` | Text input | No | Empty | Caller's phone number |
 | 4 | `Phone Extension:` | Text input | No | Empty | Optional extension |
 
@@ -462,7 +462,7 @@ This is an intentional EIDG departure from EPlus: Body 1 made Caller Name/Phone 
 - For phone origins, Verify appears alongside the checkbox section without requiring any checkboxes to be checked.
 
 **Still pending:**
-- Minimum checkbox count EPlus requires before Verify succeeds (0? 1? 2?).
+- Minimum checkbox count EPlus requires before Verify succeeds (0? 1? 2?). **Current Genesys LWC enforces ≥ 2 checkboxes** (`providerVerificationModal.js` line ~154). If EPlus requires a different count, this is a high-impact gap.
 - Error message text when validation fails on Verify click.
 - Success behavior — does modal close? Navigation? Toast?
 - Caller Type dropdown options (dropdown not opened in available screenshots).
@@ -524,12 +524,13 @@ This is an intentional EIDG departure from EPlus: Body 1 made Caller Name/Phone 
 | P-09 | `× Cancel` and `✓ Verify` — both **blue**, in modal **body** | `Close` — neutral, in **modal footer** | Button style + placement | Low | EPlus uses body-level Cancel (blue), not a footer-level neutral close. Matches Member modal pattern. |
 | P-10 | Caller Name (`* Caller Name:`) — inside "on behalf" conditional block, required | Caller Name (`* Caller Name`) — **always visible**, top-level, required (Body 1 add) | Placement intentional | N/A | EIDG deliberately moved Caller Name to always-visible for data capture reliability (Body 1, §D2). Keep as-is. |
 | P-11 | Phone Number — inside "on behalf" conditional block, optional | Phone Number — **always visible**, ANI pre-filled (Body 1 add) | Placement intentional | N/A | Same rationale as P-10. Keep always-visible per Body 1 design. |
-| P-12 | Caller Type — inside "on behalf" conditional block, combobox, `--None--` default | Caller Type — inside "on behalf" conditional block, combobox | ✅ No structural gap | — | Placement matches. Options ⚠️ PENDING (Caller Type dropdown not opened in available screenshots). Our LWC options: Billing Office, Provider/Clinical Office, Hospital Staff/Facility, Other. |
+| P-12 | `Caller Type` — inside "on behalf" block, combobox, `--None--` default. **Confirmed: no conditional rendering triggered by any selection (2026-03-25).** | Caller Type — inside "on behalf" block, combobox | ✅ No structural gap; behavior confirmed | — | Placement and behavior match. Specific dropdown options in EPlus still ⚠️ PENDING. Our LWC options: Billing Office, Provider/Clinical Office, Hospital Staff/Facility, Other — confirm these match EPlus. |
 | P-13 | `Phone Extension:` — inside "on behalf" conditional block, optional text input | `Phone Extension` — inside "on behalf" conditional block, optional | ✅ No structural gap | — | Matches EPlus. |
 | P-14 | Interaction banner: `Interaction Number is: Int-XXXXXXXXX` (blue, bold) | Interaction banner: `Interaction: Int-XXXXXXXXX` (based on `interactionName` prop) | Label text | Low | "Interaction Number is:" vs "Interaction:" — should align to EPlus wording. |
 | P-15 | Provider modal: **single-phase** (no Case Origin gate before full render) | Provider modal: all fields always visible, no phase — ✅ single-phase | ✅ No phase-gate gap | — | Both are single-phase. The gap is the phone/non-phone conditional within the single phase (P-01). |
 | P-16 | Phone Number value: `(720) 224-1440` rendered as **blue hyperlink** | Phone Number rendered as plain text | Styling | Low | Matches Member path gap M-P2-04. Render as `tel:` hyperlink. |
-| P-17 | ⚠️ "Provider Details" section header — presence/absence **unconfirmed** | No section header in LWC | Structure | ⚠️ TBD | Member modal has `Member Details` header + ⓘ icon above the checkbox group. Provider screenshots do not clearly show whether an equivalent header exists. Requires one additional screenshot to confirm before implementing. |
+| P-17 | ✅ **No section header** — EPlus Provider modal has no "Provider Details" or equivalent section header above the checkboxes | No section header in LWC | ✅ No gap | None | Confirmed from sandbox screenshot (2026-03-25). Unlike Member's `Member Details` header, Provider shows checkboxes directly. Our LWC correctly has no header here — no change needed. |
+| P-18 | Non-phone origins (Email, Voice Mail, Research, Meeting – Virtual, Meeting – In Person): EPlus shows **only Case Origin + Cancel/Verify** — no Caller Name field at all | `verify()` always requires `callerName` regardless of Case Origin — blocks non-phone Verify if caller name is empty | **Validation blocking non-phone path** | **High** | Distinct from P-10 (placement). P-10 covers where Caller Name lives; P-18 covers that `callerName` is unconditionally required in `verify()`. After P-01 fix gates the checkboxes, non-phone origins would still show Caller Name (top-level EIDG add) with a required validation that blocks Verify. **Decision needed: see §6.8.** |
 
 ---
 
@@ -669,6 +670,8 @@ EPlus has no equivalent. If COA wants to remove it for parity, or keep it as an 
 
 - **P-01** — `providerVerificationModal.html` currently renders all checkboxes and the "Are you calling on behalf of a provider?" checkbox regardless of Case Origin. **Fix needed:** Gate these sections behind a phone-origin check, exactly as EPlus does. Non-phone origins (Email, Voice Mail, Research, Meeting – Virtual, Meeting – In Person) should show only Case Origin + Cancel + Verify. This is a rendering correctness bug equivalent to Member's M-P1-02.
 
+- **P-18** — `providerVerificationModal.js` `verify()` unconditionally requires `callerName` (line ~154). After the P-01 fix gates checkboxes and the "on behalf" block behind phone origins, non-phone verifications will still be blocked by this validation. The required check on `callerName` must be conditioned on `caseOriginValue` being a phone origin. **Resolution depends on the §6.8 P-18 decision** (whether to gate, make optional, or keep required for all origins).
+
 - **P-06, P-07, P-08** — `providerVerificationModal.js` Case Origin option values are wrong for Voice Mail, Meeting – Virtual, and Meeting – In Person. Both the `label` and `value` properties must be corrected simultaneously. Stored value mismatch = data integrity issue in reports and automation. **Fix:**
   - `{ label: 'Voicemail', value: 'Voicemail' }` → `{ label: 'Voice Mail', value: 'Voice Mail' }`
   - `{ label: 'Meeting - Virtual', value: 'Meeting - Virtual' }` → `{ label: 'Meeting \u2013 Virtual', value: 'Meeting \u2013 Virtual' }`
@@ -686,11 +689,19 @@ COA should decide whether Provider Status is a meaningful data point worth captu
 
 **P-12 — Caller Type dropdown options:**
 
-Caller Type options in EPlus are unconfirmed (dropdown was not opened in available screenshots). Our LWC has: Billing Office, Provider/Clinical Office, Hospital Staff/Facility, Other. These need to be verified against EPlus before release — a single additional screenshot with the dropdown open is all that's needed.
+Caller Type **behavior** is confirmed: selecting a Caller Type value does not trigger any additional conditional rendering (confirmed by Jason, 2026-03-25). It is a data capture field only. The specific dropdown **options** available in EPlus are still unconfirmed — a single screenshot with the dropdown open is needed to verify our LWC's options (Billing Office, Provider/Clinical Office, Hospital Staff/Facility, Other) match EPlus exactly.
 
-**P-17 — "Provider Details" section header:**
+**P-18 — Caller Name required on non-phone origins (Provider):**
 
-Whether EPlus shows a `Provider Details` section header (equivalent to Member's `Member Details` + ⓘ icon) above the checkbox group is unconfirmed from available screenshots. A single screenshot is needed to resolve this before implementing or omitting the header in our LWC.
+After the P-01 fix, non-phone Case Origins will no longer show verification checkboxes or the "on behalf" block. However, Caller Name (a Body 1 always-visible EIDG addition) would still appear at the top level and is unconditionally required in `verify()`. Three options:
+
+1. **Gate Caller Name/Phone behind phone origin** — Match EPlus exactly. Non-phone origins show only Case Origin + Cancel + Verify. No caller identity captured at all for non-phone verifications.
+2. **Keep Caller Name visible but make it optional for non-phone origins** — Hybrid. Caller identity can still be entered if relevant (e.g., a colleague processed a fax on someone's behalf), but won't block Verify for Email/Research/etc.
+3. **Keep Caller Name required for all origins** — Explicitly diverge from EPlus. CSR must enter caller name even for Email/Voice Mail/Research verifications. Maximizes data capture; may be awkward UX for non-call workflows.
+
+**Decision needed from COA before implementing P-01.** See discussion prompt in §7.
+
+**P-17 — RESOLVED:** EPlus has no "Provider Details" section header. Our LWC should not add one. No action needed.
 
 ### 6.5 Files That Will Need Changes
 
@@ -699,8 +710,12 @@ Whether EPlus shows a `Provider Details` section header (equivalent to Member's 
 | `memberVerificationModal.html` | Section headers, label removal, date format, button label/placement, Rep Type placeholder |
 | `memberVerificationModal.js` | `checkSelectionsAndDisplayVerification()` non-phone fix (M-P1-02); DOB format; `required` on comboboxes; possibly new lookup fields |
 | `verifyMember.html` | Phase 1 layout if we move to sequential Case Origin → Member Type |
-| `providerVerificationModal.js` | Phone/non-phone gate (P-01); fix Case Origin options: "Voice Mail" value (P-06), "Meeting – Virtual" em dash (P-07), "Meeting – In Person" em dash (P-08); fix checkbox label "Provider Contact #" (P-02); remove "Provider Status" option or flag for COA decision (P-03); reorder checkboxes to match EPlus (P-04) |
-| `providerVerificationModal.html` | Gate verification checkboxes + "on behalf" section behind phone origin check (P-01); fix phone number to render as hyperlink (P-16); update interaction banner text (P-14) |
+| `providerVerificationModal.js` | Phone/non-phone gate (P-01); `callerName` required validation conditional on phone origin (P-18); fix Case Origin options: "Voice Mail" value (P-06), "Meeting – Virtual" em dash (P-07), "Meeting – In Person" em dash (P-08); fix checkbox label "Provider Contact #" (P-02); remove "Provider Status" option or flag for COA decision (P-03); reorder checkboxes to match EPlus (P-04) |
+| `providerVerificationModal.html` | Gate verification checkboxes + "on behalf" section behind phone origin check (P-01); fix phone number to render as hyperlink (P-16); update interaction banner text (P-14); gate or adjust Caller Name/Phone visibility for non-phone origins pending P-18 decision |
+| `providerVerificationModal.css` | Blue button styling if Cancel is moved to modal body; hyperlink styles; any layout adjustments for phone/non-phone state |
+| `verifyProvider.html` | Modal shell — update Close/Cancel button placement/label/style to match EPlus (P-09); analogous to `verifyMember.html` role for Member modal |
+| `verifyProvider.js` | Close/cancel handling if button is relocated from footer to modal body |
+| `memberVerificationModal.css` | Section header styling ("Member Details" / "Representative Details"), data column layout adjustments (remove label prefixes), hyperlink styles |
 
 ---
 
@@ -715,22 +730,112 @@ Whether EPlus shows a `Provider Details` section header (equivalent to Member's 
 | 2026-03-25 | Live sandbox screenshots from Jason | Sandbox — All 7 Relationship Types under Personal Rep | All 7 Relationship Types fully documented. Parent = lookup + Auth Type only. Guardian/County DHS/POA/Advocate/Legal Rep/Other = identical (Name text, Caller Phone, Description, Auth Type, Start Date read-only today, End Date picker today). Full field matrix confirmed. | §1.6, §1.6.4, §1.6.5 |
 | 2026-03-25 | Live sandbox screenshot from Jason | Sandbox — Member standard path (Brandon Testing, Int-171617) | Member path = Member Details only. No Representative Details section. No conditional rendering. Cancel + Verify both visible immediately. Confirmed no gaps on the Member path beyond M-P2-01 (section header) and button label. | §1.8 |
 | 2026-03-25 | Live sandbox screenshots from Jason | Sandbox — Provider workflow, all 7 Case Origins | Provider modal structure confirmed. 7 Case Origins documented. Phone vs. non-phone gate confirmed (checkboxes + on-behalf only for Inbound/Outbound). All 6 checkbox labels and values documented. "Are you calling on behalf?" unchecked and checked states confirmed for both Inbound and Outbound. No additional conditional rendering found (Jason confirmed). | §2, §3.3, §4.3, §6.5 |
+| 2026-03-25 | Live sandbox screenshot from Jason | Sandbox — Provider phone layout (Inbound, post "on behalf" testing) | Confirmed: (1) No "Provider Details" section header above checkboxes. (2) Caller Type selection does not trigger any additional conditional rendering — data capture field only. P-12 behavior resolved; P-17 closed. | §2.1, §2.4, §3.3 P-12/P-17, §6.8, §8 |
 | _TBD_ | Sandbox — Verify button behavior (both Member and Provider) | Sandbox | Min checkbox count, error messages, success navigation | §1.7, §2.5 |
-| _TBD_ | Sandbox — Caller Type dropdown options (Provider) | Sandbox | Open Caller Type combobox and capture all options | §2.4, P-12 |
+| _TBD_ | Sandbox — Caller Type dropdown options (Provider) | Sandbox | Open Caller Type combobox and capture available options | §2.4, P-12 |
 
 ---
 
 ## 8. Outstanding Sandbox Exploration Required
 
 ### Member Workflow
-1. **Member (standard) path** — Phase 2 when Member Type = Member. What fields appear? Is Representative Details hidden?
+1. ~~**Member (standard) path**~~ — ✅ RESOLVED (2026-03-25): Confirmed Member path shows Member Details only, no Representative Details section, no conditional rendering.
 2. **Verify button behavior** — Minimum checkbox count EPlus requires. Error message for insufficient checkboxes. Success behavior (navigation/toast/modal close).
 3. **Legal Rep "Select Name" interaction** — Can the lookup be used? What records does it search?
-4. **County DHS / POA / Advocate / Legal Rep / Other** relationship types — Confirm Guardian pattern applies to all.
+4. ~~**County DHS / POA / Advocate / Legal Rep / Other**~~ — ✅ RESOLVED (2026-03-25): All five confirmed identical to Guardian (Name text, Caller Phone, Description, Auth Type, Start Date read-only, End Date picker).
 5. **Walk-In / non-phone origins full path** — Confirm what "Verify" does from phase 1 with no checkboxes (direct record creation?).
 
 ### Provider Workflow
 1. **Verify button behavior** — Minimum checkbox count EPlus requires (0? 1? 2?). Error message text. Success behavior (navigation/toast/modal close).
-2. **Caller Type dropdown options** — Open the Caller Type combobox inside the "on behalf" section and capture all available options. Our LWC has: Billing Office, Provider/Clinical Office, Hospital Staff/Facility, Other — need to confirm these match EPlus.
-3. **Provider Status checkbox** — Confirm definitively not present in EPlus (already appears so from screenshots; confirm with a second provider record if possible).
-4. **Non-phone origin Verify** — Confirm what happens when Verify is clicked with only Case Origin selected for a non-phone origin (direct record creation, no checkboxes required?).
+2. **Caller Type dropdown options** — ✅ Behavior confirmed: no conditional rendering triggered. Still need to open the dropdown and capture the available options to verify they match our LWC's list (Billing Office, Provider/Clinical Office, Hospital Staff/Facility, Other).
+3. ~~**Provider Details section header**~~ — ✅ RESOLVED (2026-03-25): No section header exists in EPlus Provider modal. No change needed in LWC (P-17 closed).
+4. **Provider Status checkbox** — Confirm definitively not present in EPlus (strongly indicated by all screenshots; confirm with a second provider record if possible).
+5. **Non-phone origin Verify** — Confirm what happens when Verify is clicked with only Case Origin selected for a non-phone origin (direct record creation, no checkboxes required?).
+
+---
+
+## 9. Client Decisions Log
+
+This section tracks decisions that require COA input before implementation can proceed. Each entry includes enough context for a meeting discussion without requiring technical background.
+
+---
+
+### Decision CD-01 — Provider Verification: Should caller identity be captured for non-phone interactions?
+
+**Status:** 🔴 OPEN — required before Body 2 Provider implementation begins
+
+**Gap reference:** P-18 / §6.8
+
+**Background:**
+
+When a COA staff member uses the Genesys screen pop to verify a provider, they first select a Case Origin — the channel through which the contact arrived. Some origins are live phone calls (Inbound Phone Call, Outbound Phone Call). Others are not live calls: Email, Voice Mail, Research, Meeting – Virtual, Meeting – In Person.
+
+The EPlus verification system (the standard we are matching) treats these two groups differently:
+
+- **Phone call origins:** Show full provider verification — checkboxes to confirm provider data, plus an optional "calling on behalf of a provider?" section that captures the caller's name, type, and phone number.
+- **Non-phone-call origins:** Show only the Case Origin field. No provider checkboxes. No caller information. Staff click Verify immediately and the record is saved.
+
+Our current Genesys screen pop (built in Body 1) added a "Caller Name" field that is always visible and always required — regardless of whether the interaction is a live call or an email. This was intentional: Body 1's goal was to ensure caller identity is always captured.
+
+**The conflict:**
+
+When we fix the phone/non-phone gate (so our LWC matches EPlus behavior), non-phone verifications will no longer show the verification checkboxes. But Caller Name will still be visible and required. This means a staff member processing an email or voice mail inquiry would be blocked from completing verification unless they enter a caller name — even though there may be no identifiable caller.
+
+**The decision:**
+
+Choose one of three approaches for non-phone origins in the Provider verification screen pop:
+
+| Option | What the CSR sees (non-phone) | Caller Name captured? | Notes |
+|---|---|---|---|
+| **A — Full parity with EPlus** | Case Origin only. No caller fields shown. | No | Clean and consistent with EPlus. Staff cannot enter caller name even if they want to. |
+| **B — Optional capture** | Case Origin + Caller Name (not required). Staff can fill in if relevant. | Only if entered | Best of both worlds in theory; slight UX ambiguity since sometimes there is no caller. |
+| **C — Always required (current behavior)** | Case Origin + Caller Name (required). Must be filled to proceed. | Always | Maximizes data capture. May feel awkward for email/research workflows where no live caller exists. |
+
+**EIDG recommendation:** Option A — match EPlus exactly. The Member verification flow naturally produces the same result (non-phone Member verifications skip phase 2 entirely, so Caller Name is never shown). Keeping Provider consistent with both EPlus and the Member flow avoids confusion and simplifies implementation.
+
+**Note for meeting:** This same question technically applies to the Member LWC as well, but the Member flow resolves it naturally — the M-P1-02 bug fix will route non-phone Member origins directly to Verify from phase 1, bypassing the screen where Caller Name lives. No separate decision is needed for Member.
+
+---
+
+### Decision CD-02 — Provider Verification: Keep or remove the "Provider Status" checkbox?
+
+**Status:** 🔴 OPEN — can be decided independently of CD-01
+
+**Gap reference:** P-03 / §6.8
+
+**Background:**
+
+Our Genesys screen pop includes a "Provider Status" checkbox in the provider verification list. EPlus does not have this checkbox — it is not part of the standard EPlus provider verification. It appears EIDG added it at some point, but it is not documented as an intentional addition in Body 1's change log (unlike Caller Name/Phone, which are explicitly documented).
+
+**The decision:**
+
+| Option | Description |
+|---|---|
+| **Remove it** | Match EPlus exactly. Provider Status is not a verifiable attribute in the standard workflow. |
+| **Keep it as an EIDG addition** | Treat it like Caller Name/Phone — an intentional data capture enhancement. Requires confirming that the underlying field (`UST_EPLUS__Verification_Information__c`) has a field to store this value, otherwise checking it has no effect on the saved record. |
+
+**EIDG recommendation:** Verify whether a Provider Status field exists on the verification record object before deciding. If no field exists to store it, the checkbox is cosmetic-only and should be removed. If the field exists and COA finds value in capturing it, it can be kept with documentation as an intentional addition.
+
+---
+
+### Decision CD-03 — Member Verification: What should happen to authorized representative data capture?
+
+**Status:** 🟡 OPEN — lower urgency; scoping decision affects Body 2 complexity significantly
+
+**Gap reference:** M-P2-13/14/15/16 / §6.4
+
+**Background:**
+
+When a member calls in and identifies themselves as a Non-Member (someone calling on behalf of a member), EPlus requires the CSR to select a Representative Type. For "Legal Representative," EPlus shows a searchable name lookup tied to authorized representative records already on file for that member in the EPlus system. For "Personal Representative," depending on the relationship type (Guardian, POA, etc.), EPlus shows fields to create a new authorization record in real time — including the representative's name, phone, and a start/end date for the authorization.
+
+Our current Genesys screen pop shows only a free-text Description textarea for all representative types. It does not look up existing records and does not create new authorization records.
+
+**The decision:**
+
+| Option | Description | Complexity |
+|---|---|---|
+| **Match EPlus fully** | Build a lookup to query existing EPlus authorized rep records; build a form to create new records during verification. Requires identifying EPlus managed package object API names and building Apex queries. | High |
+| **Partial match** | Show the Name and Caller Phone fields (free-text, not a lookup) for Guardian/POA/etc. types. Does not create EPlus records, but captures the same data points the CSR would have entered. Remove Description textarea. | Medium |
+| **Keep Description textarea** | Keep the current approach as an EIDG addition. Staff can type whatever notes are relevant. No structural parity with EPlus. | No change |
+
+**EIDG recommendation:** Discuss with COA whether authorized representative data entered through the Genesys screen pop needs to feed back into the EPlus managed package records, or whether it is supplementary data captured on the Salesforce verification record only. The answer drives the complexity of this item significantly.

@@ -870,15 +870,19 @@
     <div class="decision-card" data-cd="cd01">
       <div class="decision-header">
         <div>
-          <div class="decision-id">CD-01 · Provider Verification</div>
+          <div class="decision-id">CD-01 · Member &amp; Provider Verification</div>
           <div class="decision-title">Should "Caller Name" be captured for non-phone interactions?</div>
         </div>
-        <div class="decision-status" id="status-cd01">🔴 Required before Provider work begins</div>
+        <div class="decision-status" id="status-cd01">🔴 Required before non-phone work begins (both modals)</div>
       </div>
       <div class="decision-body">
-        <p>When a CSR verifies a provider, they first select a Case Origin. Phone call origins (Inbound, Outbound) show the full verification layout including caller information fields. Non-phone origins (Email, Voice Mail, Research, Meeting – Virtual, Meeting – In Person) show <strong>only Case Origin in EPlus</strong> — no checkboxes, no caller information.</p>
-        <p style="margin-top:8px;">Our current Genesys screen pop (Body 1) added a "Caller Name" field that is always visible and always required — even for Email, Voice Mail, and Research interactions where there may be no live caller. Once the phone/non-phone gate is fixed (P-01), this required field will block non-phone verifications unless we also adjust it.</p>
-        <p style="margin-top:8px;"><strong>Note:</strong> This decision is Provider-specific. The Member modal resolves this naturally — non-phone Member verifications bypass the screen where Caller Name lives entirely.</p>
+        <p>For both Member and Provider verification, EPlus creates a record with <strong>only Case Origin populated</strong> on non-phone interactions (Email, Voice Mail, Research, Meetings) — no caller information fields are shown or required.</p>
+        <p style="margin-top:8px;">Our current Genesys screen pop (Body 1) added "Caller Name" as always-visible and always-required. This creates a dependency on both modals:</p>
+        <ul style="margin-top:6px;font-size:13px;padding-left:20px;line-height:1.8;">
+          <li><strong>Provider (P-01/P-18):</strong> Once the phone/non-phone gate is fixed, a required Caller Name field will block non-phone verifications unless adjusted.</li>
+          <li><strong>Member (M-P1-02):</strong> The new <code>verifyPhaseOne()</code> method for non-phone Member paths passes an empty Caller Name. If <code>UST_EPLUS__Caller_Name__c</code> is required at the object level, this will cause a DML error at save time.</li>
+        </ul>
+        <p style="margin-top:8px;"><strong>Pre-implementation check required:</strong> Verify whether <code>UST_EPLUS__Caller_Name__c</code> allows blank values via Setup → Object Manager → Verification Information → Fields. If the field is required at the object level, Option A is not viable without a field-level change.</p>
       </div>
       <div class="options-grid">
         <div class="option-card recommended" data-cd="cd01" data-opt="A" onclick="selectOption(this)">

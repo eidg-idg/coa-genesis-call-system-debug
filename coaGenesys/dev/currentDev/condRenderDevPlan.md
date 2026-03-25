@@ -16,6 +16,32 @@ COA does not own or have access to the EPlus managed package source code. The ma
 
 This means all implementation decisions must be validated against the observable behavior of the EPlus workflow, not against assumptions about how it works internally.
 
+### Progress Tracking
+
+This section provides a lightweight, at-a-glance progress view for this plan. Progress is tracked at the **Implementation Item** level (A/B/C groups). Group D items represent **decisions or external validation** that may block or reshape implementation.
+
+| Scope | Total | Complete | Incomplete | % Done |
+|------|------:|---------:|-----------:|-------:|
+| Implementation Items (Groups A–C) | 23 | 0 | 23 | 0% |
+| Decision / Validation Items (Group D) | 6 | 0 | 6 | 0% |
+
+**Overall ratio (Implementation A–C):** 0 complete / 23 incomplete
+
+### Complexity & Expected Timeline
+
+**Complexity:** Medium-to-high. This work is primarily UI parity (conditional rendering, field sets, required/validation UX, and value normalization) across multiple LWCs, with several cross-component touch points.
+
+**Primary schedule risks / dependencies:**
+- **D-6** (non-phone Caller Name persistence behavior + field requirement)
+- **D-5** (EPlus post-Verify success/failure UX, impacts navigation design)
+- **D-3 / D-4** (sandbox verification of checkbox minimum + Caller Type options)
+- **D-1 / A-12** (managed package auth rep object feasibility, if lookup functionality is desired)
+
+**Expected timeline to delivery (estimate):**
+- If Phase 1–3 items (Groups A–C) are implemented with no additional scope expansion and blocking decisions are resolved early: **~1–2 weeks** for development + internal QA in sandbox.
+- COA QA/UAT and deployment scheduling typically adds an additional **~1–2 weeks** depending on stakeholder availability.
+- If COA elects to implement managed-package-backed authorization record creation / functional lookups (D-1 / A-12 scope expansion), timeline will extend based on access and integration complexity.
+
 ### Access & Deployment Model
 
 - **Production access:** EIDG does not have direct access to the client's production Salesforce instance due to geographical constraints (Portugal) and the presence of PII/PHI. The client's team will manage all production deployments.

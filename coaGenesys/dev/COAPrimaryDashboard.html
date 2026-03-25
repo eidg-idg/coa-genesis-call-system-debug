@@ -1,420 +1,1025 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COA Genesys Verification — Project Dashboard</title>
-    <style>
-        :root {
-            --primary: #0176d3;
-            --primary-dark: #014486;
-            --accent: #1b96ff;
-            --success: #2e844a;
-            --warning: #dd7a01;
-            --bg: #f4f6f9;
-            --card-bg: #ffffff;
-            --text: #181818;
-            --text-secondary: #444746;
-            --border: #d8dde6;
-            --radius: 10px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COA – EIDG Genesys Conditional Rendering Initiative – Project Dashboard</title>
+<style>
+  :root {
+    --blue-dark:   #1a3a5c;
+    --blue-mid:    #1f5fa6;
+    --blue-light:  #e8f0fb;
+    --red:         #c0392b;
+    --red-light:   #fdecea;
+    --amber:       #d68910;
+    --amber-light: #fef9e7;
+    --green:       #1a7a3f;
+    --green-light: #eafaf1;
+    --grey:        #6b7280;
+    --grey-light:  #f3f4f6;
+    --white:       #ffffff;
+    --border:      #d1d5db;
+    --text:        #111827;
+    --text-light:  #6b7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f4f8;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* HEADER */
+  .site-header {
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-mid) 100%);
+    color: var(--white);
+    padding: 28px 40px 24px;
+  }
+  .site-header .label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; opacity: .7; margin-bottom: 6px; }
+  .site-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -.3px; margin-bottom: 6px; }
+  .site-header .meta { font-size: 13px; opacity: .75; display: flex; gap: 24px; flex-wrap: wrap; }
+  .site-header .meta span::before { content: '• '; }
+  .site-header .meta span:first-child::before { content: ''; }
 
-        body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-        }
+  /* STAT CARDS */
+  .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 14px; padding: 20px 40px; background: var(--white); border-bottom: 1px solid var(--border); }
+  .stat-card { background: var(--grey-light); border-radius: 8px; padding: 14px 16px; text-align: center; border-top: 3px solid var(--border); }
+  .stat-card.red   { border-top-color: var(--red);    background: var(--red-light); }
+  .stat-card.amber { border-top-color: var(--amber);  background: var(--amber-light); }
+  .stat-card.green { border-top-color: var(--green);  background: var(--green-light); }
+  .stat-card.blue  { border-top-color: var(--blue-mid); background: var(--blue-light); }
+  .stat-card.purple { border-top-color: #7c3aed; background: #f5f3ff; }
+  .stat-card .number { font-size: 30px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+  .stat-card.red   .number { color: var(--red); }
+  .stat-card.amber .number { color: var(--amber); }
+  .stat-card.green .number { color: var(--green); }
+  .stat-card.blue  .number { color: var(--blue-mid); }
+  .stat-card.purple .number { color: #7c3aed; }
+  .stat-card .label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-light); }
 
-        header {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            color: #fff;
-            padding: 2.5rem 2rem 2rem;
-        }
+  /* TABS */
+  .tabs-nav { display: flex; gap: 2px; padding: 0 40px; background: var(--white); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .tab-btn { padding: 13px 20px; border: none; background: transparent; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-light); border-bottom: 3px solid transparent; white-space: nowrap; transition: color .15s, border-color .15s; }
+  .tab-btn:hover { color: var(--blue-mid); }
+  .tab-btn.active { color: var(--blue-mid); border-bottom-color: var(--blue-mid); }
+  .tab-btn .badge { display: inline-block; background: var(--red); color: white; border-radius: 10px; font-size: 10px; font-weight: 700; padding: 1px 6px; margin-left: 6px; vertical-align: middle; }
+  .tab-btn .badge.amber  { background: var(--amber); }
+  .tab-btn .badge.purple { background: #7c3aed; }
 
-        header h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
+  /* CONTENT */
+  .content { padding: 28px 40px; max-width: 1400px; }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
 
-        header p {
-            font-size: 0.95rem;
-            opacity: 0.9;
-        }
+  /* SECTION HEADERS */
+  .section-title { font-size: 16px; font-weight: 700; color: var(--blue-dark); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--blue-light); display: flex; align-items: center; gap: 10px; }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem 3rem;
-        }
+  /* CARDS */
+  .card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-bottom: 20px; }
+  .card-header { font-size: 14px; font-weight: 700; color: var(--blue-dark); margin-bottom: 12px; }
 
-        .section-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            margin-bottom: 1rem;
-            padding-bottom: 0.4rem;
-            border-bottom: 2px solid var(--accent);
-            display: inline-block;
-        }
+  /* TWO-COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
 
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 1.25rem;
-            margin-bottom: 2.5rem;
-        }
+  /* PRIORITY BADGES */
+  .badge-high     { background: var(--red);   color: white; border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .badge-medium   { background: var(--amber); color: white; border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .badge-low      { background: #9ca3af;      color: white; border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .badge-ok       { background: var(--green); color: white; border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .badge-na       { background: #e5e7eb;      color: #374151; border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+  .badge-decision { background: #7c3aed;      color: white; border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
 
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-        }
+  /* TABLES */
+  .gap-table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { background: var(--blue-dark); color: white; padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:hover { background: var(--grey-light); }
+  tbody td { padding: 10px 12px; vertical-align: top; }
+  tbody tr.row-high     { border-left: 4px solid var(--red); }
+  tbody tr.row-medium   { border-left: 4px solid var(--amber); }
+  tbody tr.row-low      { border-left: 4px solid #9ca3af; }
+  tbody tr.row-ok       { border-left: 4px solid var(--green); opacity: .75; }
+  tbody tr.row-na       { border-left: 4px solid #d1d5db; opacity: .65; }
+  tbody tr.row-decision { border-left: 4px solid #7c3aed; }
+  .gap-id { font-family: monospace; font-weight: 700; font-size: 12px; color: var(--blue-dark); white-space: nowrap; }
 
-        .card h3 {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--primary-dark);
-        }
+  /* FILTER BAR */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .filter-bar label { font-size: 12px; font-weight: 600; color: var(--text-light); }
+  .filter-btn { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: white; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; }
+  .filter-btn:hover { background: var(--blue-light); border-color: var(--blue-mid); color: var(--blue-mid); }
+  .filter-btn.active { background: var(--blue-mid); color: white; border-color: var(--blue-mid); }
 
-        .card p, .card li {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
+  /* FLOW */
+  .flow { display: flex; align-items: stretch; margin-bottom: 20px; overflow-x: auto; }
+  .flow-step { flex: 1; min-width: 130px; background: var(--blue-light); border: 1px solid #bfcfe8; padding: 14px 16px; position: relative; text-align: center; }
+  .flow-step:first-child { border-radius: 8px 0 0 8px; }
+  .flow-step:last-child  { border-radius: 0 8px 8px 0; }
+  .flow-step::after { content: '▶'; position: absolute; right: -12px; top: 50%; transform: translateY(-50%); color: var(--blue-mid); font-size: 16px; z-index: 1; }
+  .flow-step:last-child::after { display: none; }
+  .flow-step.gap { background: var(--red-light); border-color: #f5c6c0; }
+  .flow-step .step-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-light); margin-bottom: 4px; }
+  .flow-step .step-text  { font-size: 12px; font-weight: 600; color: var(--blue-dark); }
+  .flow-step.gap .step-text { color: var(--red); }
 
-        .card ul {
-            padding-left: 1.25rem;
-            margin-top: 0.35rem;
-        }
+  /* DECISION CARDS */
+  .decision-card { background: white; border: 1px solid #d8b4fe; border-left: 5px solid #7c3aed; border-radius: 8px; padding: 20px 24px; margin-bottom: 20px; }
+  .decision-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .decision-id { font-size: 11px; font-weight: 700; color: #7c3aed; letter-spacing: .08em; text-transform: uppercase; }
+  .decision-title { font-size: 15px; font-weight: 700; color: var(--blue-dark); margin-top: 2px; }
+  .decision-status { background: #fef3c7; color: #92400e; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .decision-body { font-size: 13px; color: var(--text); line-height: 1.7; margin-bottom: 14px; }
+  .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .option-card { border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; background: var(--grey-light); }
+  .option-card.recommended { border-color: var(--green); background: var(--green-light); }
+  .option-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; color: var(--text-light); }
+  .option-card.recommended .option-label { color: var(--green); }
+  .option-card { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+  .option-card:hover { border-color: var(--blue-mid); }
+  .option-card.selected { border: 2px solid var(--blue-mid); box-shadow: 0 0 0 3px rgba(31,95,166,.12); }
+  .option-card.recommended.selected { border-color: var(--green); box-shadow: 0 0 0 3px rgba(26,122,63,.12); }
+  .option-checkmark { display: none; float: right; font-weight: 900; font-size: 15px; color: var(--blue-mid); line-height: 1; }
+  .option-card.selected .option-checkmark { display: inline; }
+  .option-card.recommended.selected .option-checkmark { color: var(--green); }
+  .decision-status.resolved { background: #d1fae5; color: #065f46; }
+  .option-desc { font-size: 12px; color: var(--text); line-height: 1.5; }
+  .rec-tag { display: inline-block; background: var(--green); color: white; font-size: 10px; font-weight: 700; border-radius: 3px; padding: 1px 6px; margin-left: 6px; vertical-align: middle; }
 
-        .card ul li {
-            margin-bottom: 0.25rem;
-        }
+  /* INFO ROWS */
+  .info-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .info-row .text { flex: 1; }
 
-        /* Status badges */
-        .badge {
-            display: inline-block;
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 0.2rem 0.65rem;
-            border-radius: 999px;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-        .badge-done    { background: #e3f5ec; color: var(--success); }
-        .badge-active  { background: #e1f0ff; color: var(--accent); }
-        .badge-pending { background: #fff3e0; color: var(--warning); }
+  /* PENDING */
+  .pending-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; background: var(--amber-light); border-left: 3px solid var(--amber); border-radius: 0 6px 6px 0; margin-bottom: 8px; font-size: 13px; }
+  .pending-item .icon { color: var(--amber); font-size: 16px; flex-shrink: 0; }
 
-        /* Timeline / Phase list */
-        .phase-list {
-            list-style: none;
-            padding: 0;
-        }
+  /* EIDG ADDS */
+  .eidg-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; background: var(--green-light); border-left: 3px solid var(--green); border-radius: 0 6px 6px 0; margin-bottom: 8px; font-size: 13px; }
 
-        .phase-list li {
-            position: relative;
-            padding: 1rem 1rem 1rem 2.5rem;
-            margin-bottom: 0.75rem;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-        }
+  /* FILE TABLE */
+  .file-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .file-row:last-child { border-bottom: none; }
+  .file-name { font-family: monospace; font-size: 12px; font-weight: 700; color: var(--blue-mid); min-width: 240px; flex-shrink: 0; }
+  .file-desc { font-size: 13px; color: var(--text); flex: 1; }
 
-        .phase-list li::before {
-            content: attr(data-step);
-            position: absolute;
-            left: -0.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 2rem;
-            height: 2rem;
-            background: var(--primary);
-            color: #fff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
+  /* PHASE HEADER */
+  .phase-header { background: var(--blue-dark); color: white; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 12px; margin-top: 20px; display: inline-block; }
 
-        .phase-list li strong {
-            display: block;
-            font-size: 0.95rem;
-            margin-bottom: 0.15rem;
-        }
+  /* GAP ROW EXPAND */
+  tr.gap-row { cursor: pointer; }
+  tr.gap-row:hover td { background: #f0f4f8; }
+  .chevron { display: inline-block; transition: transform .2s; margin-right: 5px; font-size: 9px; color: #9ca3af; }
+  tr.gap-row.open .chevron { transform: rotate(90deg); color: var(--blue-mid); }
+  tr.gap-detail { display: none; }
+  tr.gap-detail.visible { display: table-row; }
+  tr.gap-detail td { padding: 0; border-bottom: 2px solid var(--border); }
+  .detail-inner { padding: 14px 16px 16px 36px; background: #f8fafc; font-size: 13px; line-height: 1.65; }
+  .detail-inner .detail-section { margin-bottom: 10px; }
+  .detail-inner .detail-section:last-child { margin-bottom: 0; }
+  .detail-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+  .detail-label.gap-label   { color: var(--red); }
+  .detail-label.impact-label { color: var(--amber); }
+  .detail-label.fix-label   { color: var(--green); }
+  .detail-label.info-label  { color: var(--blue-mid); }
 
-        .phase-list li span {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        /* Roles table */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
-        }
-
-        th, td {
-            text-align: left;
-            padding: 0.65rem 0.85rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        th {
-            background: var(--primary-dark);
-            color: #fff;
-            font-weight: 600;
-        }
-
-        tr:nth-child(even) {
-            background: #f9fafb;
-        }
-
-        footer {
-            text-align: center;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            padding: 1.5rem 1rem;
-            border-top: 1px solid var(--border);
-        }
-    </style>
+  /* FOOTER */
+  .site-footer { margin-top: 40px; padding: 16px 40px; background: var(--white); border-top: 1px solid var(--border); font-size: 12px; color: var(--text-light); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+</style>
 </head>
 <body>
 
-<header>
-    <div style="max-width:1100px;margin:0 auto;">
-        <h1>Colorado Access &mdash; Genesys Verification Project</h1>
-        <p>Consulting Developer: <strong>EIDG</strong> &nbsp;|&nbsp; Salesforce Health Cloud + Genesys Cloud Integration</p>
-    </div>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="label">Client Project Dashboard</div>
+  <h1>COA – EIDG Genesys Conditional Rendering Initiative</h1>
+  <div class="meta">
+    <span>Client: Colorado Access (coaccess3)</span>
+    <span>EIDG Consultant: Jason Kuczek</span>
+    <span>Sandbox: coaccess3–genesys1</span>
+    <span>EPlus Package: UST_EPLUS v23.1.0.0</span>
+    <span>Analysis Date: March 25, 2026</span>
+  </div>
 </header>
 
-<div class="container">
+<!-- STAT CARDS -->
+<div class="stats-bar">
+  <div class="stat-card blue">
+    <div class="number">34</div>
+    <div class="label">Total Gaps Identified</div>
+  </div>
+  <div class="stat-card red">
+    <div class="number">10</div>
+    <div class="label">High-Priority Gaps</div>
+  </div>
+  <div class="stat-card amber">
+    <div class="number">14</div>
+    <div class="label">Medium Gaps</div>
+  </div>
+  <div class="stat-card">
+    <div class="number">10</div>
+    <div class="label">Low / Cosmetic Gaps</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="number">3</div>
+    <div class="label">Client Decisions Needed</div>
+  </div>
+</div>
 
-    <!-- ============================================================ -->
-    <!-- PROJECT OVERVIEW                                              -->
-    <!-- ============================================================ -->
-    <h2 class="section-title">Project Overview</h2>
-    <div class="card-grid">
-        <div class="card">
-            <h3>What Is This Project?</h3>
-            <p>
-                When a phone call comes in through Genesys Cloud, Salesforce automatically
-                "screen pops" a verification page so the CSR can confirm the caller's identity.
-                This project ensures that workflow is reliable, captures all required data,
-                and matches the experience CSRs see when they use the EPlus manual
-                verification process.
-            </p>
-        </div>
-        <div class="card">
-            <h3>Why Does It Matter?</h3>
-            <ul>
-                <li>Verification records were intermittently <strong>not saved</strong>, creating compliance gaps</li>
-                <li>Caller Name and Phone were <strong>hidden</strong> for most call types</li>
-                <li>The Genesys screen pop and EPlus manual flows show <strong>different fields</strong> in a different order, confusing CSRs</li>
-                <li>Achieving parity reduces training burden and improves audit readiness</li>
-            </ul>
-        </div>
-        <div class="card">
-            <h3>Two Bodies of Work</h3>
-            <p>
-                <strong>Body 1 — Remediation</strong> <span class="badge badge-done">Code Complete</span><br>
-                Fix the save-before-close race condition, make Caller Name/Phone always visible, pass ANI end-to-end, add error handling.
-            </p>
-            <p style="margin-top:0.5rem;">
-                <strong>Body 2 — Conditional Rendering Parity</strong> <span class="badge badge-active">Active</span><br>
-                Reverse-engineer the EPlus managed package UI and align the Genesys screen pop so both paths show identical fields, validations, and conditional logic.
-            </p>
-        </div>
+<!-- TABS -->
+<nav class="tabs-nav">
+  <button class="tab-btn active" onclick="showTab('overview', this)">Overview</button>
+  <button class="tab-btn" onclick="showTab('gaps', this)">Full Gap Analysis</button>
+  <button class="tab-btn" onclick="showTab('decisions', this)">Decisions Required <span class="badge purple">3</span></button>
+  <button class="tab-btn" onclick="showTab('files', this)">Files &amp; Scope</button>
+</nav>
+
+<div class="content">
+
+  <!-- OVERVIEW -->
+  <div id="tab-overview" class="tab-pane active">
+
+    <div class="section-title">🎯 Initiative Summary</div>
+    <div class="card">
+      <div class="card-header">What This Work Is</div>
+      <p style="font-size:13px;line-height:1.7;">Colorado Access uses the <strong>EPlus managed package</strong> (Engagement Plus, v23.1.0.0) as their primary member and provider verification tool inside Salesforce Service Center. When a Genesys phone interaction is delivered to an agent, EIDG's custom <strong>Genesys screen pop LWC components</strong> launch alongside the EPlus verification workflow.</p>
+      <p style="font-size:13px;line-height:1.7;margin-top:10px;"><strong>Body 1 work (completed)</strong> addressed save reliability, caller identity capture, and ANI pass-through. <strong>Body 2</strong> addresses conditional rendering parity — making the Genesys screen pop LWCs match EPlus's field-by-field display rules so CSRs see a consistent, accurate interface across both systems.</p>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- CURRENT STATUS                                                -->
-    <!-- ============================================================ -->
-    <h2 class="section-title">Current Status</h2>
-    <div class="card-grid">
-        <div class="card">
-            <h3>Remediation (Body 1)</h3>
-            <ul>
-                <li><span class="badge badge-done">Done</span> Phase 1 — Core verification fixes</li>
-                <li><span class="badge badge-done">Done</span> Phase 2 — Best-practice hardening</li>
-                <li><span class="badge badge-done">Done</span> Phase 3 — Cleanup (JSENCODE, LIMIT, logging)</li>
-                <li><span class="badge badge-pending">Pending</span> Step 2.4 / 3.2 — Trigger handler refactor (separate deployment)</li>
-                <li><span class="badge badge-done">Done</span> Sandbox deployment — 30 components deployed</li>
-            </ul>
-        </div>
-        <div class="card">
-            <h3>Conditional Rendering Parity (Body 2)</h3>
-            <ul>
-                <li><span class="badge badge-done">Done</span> Development plan authored</li>
-                <li><span class="badge badge-active">Active</span> Reverse-engineering EPlus verification UI</li>
-                <li><span class="badge badge-pending">Pending</span> Document Member verification conditional rendering</li>
-                <li><span class="badge badge-pending">Pending</span> Document Provider verification conditional rendering</li>
-                <li><span class="badge badge-pending">Pending</span> Implement parity changes in LWC code</li>
-            </ul>
-        </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">🔬 How These Findings Were Produced</div>
+        <div class="info-row"><span class="icon">📸</span><span class="text"><strong>Source 1:</strong> Client-supplied <em>Member Provider Search.docx</em> — 10 screenshots (5 EPlus / 5 Genesys side-by-side, Member Non-Member path)</span></div>
+        <div class="info-row"><span class="icon">🖥️</span><span class="text"><strong>Source 2:</strong> Live sandbox screenshots — all EPlus modal states for both Member and Provider workflows (all Case Origins, all Representative Types, "on behalf" checked/unchecked)</span></div>
+        <div class="info-row"><span class="icon">🔒</span><span class="text"><strong>Constraint:</strong> EPlus is a managed package — source code is inaccessible. All findings are based on direct UI observation. EPlus is the definitive reference standard.</span></div>
+        <div class="info-row"><span class="icon">✅</span><span class="text"><strong>Confidence:</strong> Both workflows fully documented. 4 minor sandbox items still pending (Verify behavior, Caller Type options).</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">⚡ Key Findings at a Glance</div>
+        <div class="info-row"><span class="icon">🔴</span><span class="text"><strong>Critical Member bug:</strong> Non-phone call origins (Email, Walk-In, Research, etc.) cannot complete verification in the current LWC. EPlus allows immediate Verify — our LWC blocks them entirely.</span></div>
+        <div class="info-row"><span class="icon">🔴</span><span class="text"><strong>Critical Provider bug:</strong> Provider verification checkboxes are always shown regardless of channel. EPlus only shows them for phone calls — non-phone should show Case Origin + Verify only.</span></div>
+        <div class="info-row"><span class="icon">🔴</span><span class="text"><strong>Data integrity risk:</strong> 3 Provider Case Origin values are stored incorrectly. Reports filtering on "Voice Mail" or meeting origins will miss records saved by our LWC.</span></div>
+        <div class="info-row"><span class="icon">🟢</span><span class="text"><strong>EIDG additions are sound:</strong> Caller Name, Caller Phone (ANI-prefilled), and Provider Status are intentional EIDG enhancements beyond EPlus. Most should remain pending COA decisions.</span></div>
+      </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- DELIVERY PLAN                                                 -->
-    <!-- ============================================================ -->
-    <h2 class="section-title">Delivery Plan</h2>
-    <ol class="phase-list">
-        <li data-step="1">
-            <strong>Reverse-Engineer EPlus Workflows</strong>
-            <span>Manually explore the EPlus Member and Provider verification UIs in the Genesys sandbox. Document every field, conditional rule, and validation observed. Cross-check against <em>Member Provider Search.docx</em>.</span>
-        </li>
-        <li data-step="2">
-            <strong>Gap Analysis</strong>
-            <span>Compare the documented EPlus behavior against the current Genesys screen pop LWCs. Identify every difference in field presence, ordering, required vs. optional status, and conditional visibility.</span>
-        </li>
-        <li data-step="3">
-            <strong>Implement Parity Changes</strong>
-            <span>Modify the LWC templates and JavaScript to match the EPlus rendering. All changes will live in the code EIDG owns (Apex controllers, VF pages, LWCs).</span>
-        </li>
-        <li data-step="4">
-            <strong>QA &amp; UAT</strong>
-            <span>Side-by-side testing of both workflows in the sandbox to verify visual and behavioral parity. Both bodies of work validated together.</span>
-        </li>
-        <li data-step="5">
-            <strong>Production Deployment</strong>
-            <span>EIDG delivers a file manifest, draft change set, and deployment instructions. COA's team executes the production deployment. EIDG provides post-deployment verification support.</span>
-        </li>
-    </ol>
-
-    <!-- ============================================================ -->
-    <!-- ROLES & RESPONSIBILITIES                                      -->
-    <!-- ============================================================ -->
-    <h2 class="section-title">Roles &amp; Responsibilities</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Area</th>
-                <th>EIDG (Consulting Developer)</th>
-                <th>Colorado Access</th>
-            </tr>
-        </thead>
+    <div class="section-title" style="margin-top:8px;">📊 Gap Summary by Category</div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Category</th><th>Gaps</th><th>High</th><th>Medium</th><th>Low</th><th>Representative Items</th></tr></thead>
         <tbody>
-            <tr>
-                <td>Development</td>
-                <td>All code changes, testing in sandbox</td>
-                <td>Review PRs, provide feedback</td>
-            </tr>
-            <tr>
-                <td>Sandbox Access</td>
-                <td>Direct access to Genesys sandbox</td>
-                <td>Maintain sandbox configuration</td>
-            </tr>
-            <tr>
-                <td>Production Deployment</td>
-                <td>Provide file manifest, change set spec, and instructions</td>
-                <td>Execute deployment, run smoke tests</td>
-            </tr>
-            <tr>
-                <td>UAT</td>
-                <td>Test in sandbox, document results</td>
-                <td>Final sign-off on production behavior</td>
-            </tr>
-            <tr>
-                <td>PII / PHI</td>
-                <td>No direct production access (geographical / compliance constraint)</td>
-                <td>All production data access managed internally</td>
-            </tr>
+          <tr class="row-high"><td><strong>Member — Critical Bug</strong></td><td>1</td><td><span class="badge-high">1</span></td><td>—</td><td>—</td><td>Non-phone path blocks verification entirely (M-P1-02)</td></tr>
+          <tr class="row-medium"><td><strong>Member — Structure &amp; Layout</strong></td><td>6</td><td>—</td><td><span class="badge-medium">4</span></td><td><span class="badge-low">2</span></td><td>Missing section headers, label prefixes, required attributes</td></tr>
+          <tr class="row-high"><td><strong>Member — Rep Details (Scope)</strong></td><td>4</td><td><span class="badge-high">4</span></td><td>—</td><td>—</td><td>Auth rep lookups and Guardian fields — requires COA decision (CD-03)</td></tr>
+          <tr class="row-low"><td><strong>Member — Cosmetic / Minor</strong></td><td>6</td><td>—</td><td>—</td><td><span class="badge-low">6</span></td><td>Phone hyperlink, DOB format, country line, button label, banner text</td></tr>
+          <tr class="row-high"><td><strong>Provider — Critical Bugs</strong></td><td>4</td><td><span class="badge-high">4</span></td><td>—</td><td>—</td><td>Phone gate missing + 3 stored value mismatches</td></tr>
+          <tr class="row-decision"><td><strong>Provider — Decisions Needed</strong></td><td>2</td><td><span class="badge-high">1</span></td><td><span class="badge-medium">1</span></td><td>—</td><td>Caller Name on non-phone (P-18/CD-01), Provider Status (P-03/CD-02)</td></tr>
+          <tr class="row-medium"><td><strong>Provider — Labels &amp; Ordering</strong></td><td>3</td><td>—</td><td><span class="badge-medium">3</span></td><td>—</td><td>Provider Contact # label, checkbox ordering</td></tr>
+          <tr class="row-low"><td><strong>Provider — Cosmetic / Minor</strong></td><td>4</td><td>—</td><td>—</td><td><span class="badge-low">4</span></td><td>Phone hyperlink, banner text, button placement</td></tr>
         </tbody>
-    </table>
+      </table>
+    </div>
+  </div>
 
-    <!-- ============================================================ -->
-    <!-- KEY DECISIONS                                                 -->
-    <!-- ============================================================ -->
-    <h2 class="section-title">Key Decisions</h2>
-    <div class="card-grid">
-        <div class="card">
-            <h3>Save-Before-Close</h3>
-            <p>Verification records are now saved <strong>before</strong> the modal closes. If the save fails, the modal stays open with an error message and the CSR can retry.</p>
-        </div>
-        <div class="card">
-            <h3>Caller Identity Always Captured</h3>
-            <p>Caller Name is <strong>required</strong> on both Member and Provider paths. Caller Phone is optional and auto-filled from the Genesys ANI when available.</p>
-        </div>
-        <div class="card">
-            <h3>Parity by Observation</h3>
-            <p>Because COA does not own the EPlus source code, all parity decisions are based on <strong>observed runtime behavior</strong>, not assumptions about internal logic.</p>
-        </div>
-        <div class="card">
-            <h3>Phased Deployment</h3>
-            <p>The trigger handler refactor deploys <strong>separately</strong> from the call-flow fixes to reduce risk. Both bodies of work will be combined for the final production release.</p>
-        </div>
+  <!-- FULL GAP ANALYSIS (member/provider workflow tabs removed) -->
+  <div id="tab-member" class="tab-pane" style="display:none!important;">
+
+    <div class="section-title">👤 Member Verification — EPlus Reference Standard</div>
+
+    <div class="card">
+      <div class="card-header">Phase 1 — Case Origin Gate (How EPlus Works)</div>
+      <div class="flow">
+        <div class="flow-step"><div class="step-label">Modal Opens</div><div class="step-text">Case Origin dropdown only</div></div>
+        <div class="flow-step"><div class="step-label">Phone Origins</div><div class="step-text">Member Type appears<br>(Member / Non-Member)</div></div>
+        <div class="flow-step"><div class="step-label">Non-Phone Origins</div><div class="step-text">Verify available immediately — no checkboxes shown</div></div>
+        <div class="flow-step"><div class="step-label">Phone + Member Type</div><div class="step-text">Proceed to Phase 2 verification</div></div>
+      </div>
+      <p style="font-size:12px;color:var(--text-light);"><strong>11 Case Origin options:</strong> Inbound Phone Call, Outbound Phone Call, Chat, Walk-In, Research, Transfer, Email, Fax, Voice Mail, Mail, Meeting – Virtual</p>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- COMPONENT INVENTORY (SIMPLIFIED)                              -->
-    <!-- ============================================================ -->
-    <h2 class="section-title">Components Touched</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Component</th>
-                <th>Type</th>
-                <th>Role</th>
-            </tr>
-        </thead>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">✅ Phase 2 — Member Path (No Conditional Rendering)</div>
+        <p style="font-size:13px;line-height:1.7;">When Member Type = <strong>Member</strong>, EPlus shows only the Member Details checkbox group. No Representative Details section appears. Our LWC correctly replicates this — <strong>no gap on the standard Member path.</strong></p>
+        <div style="margin-top:12px;">
+          <div class="info-row"><span class="icon">☑️</span><span class="text">Member ID, SSN, Member Name*, Date of Birth*, Phone Number, Mailing Address* <em>(* required when data present)</em></span></div>
+          <div class="info-row"><span class="icon">🔘</span><span class="text">Disabled (grey) checkboxes when field has no data — cannot be checked</span></div>
+          <div class="info-row"><span class="icon">🔗</span><span class="text">Phone number rendered as blue clickable hyperlink</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">⚠️ Phase 2 — Non-Member Path (Conditional on Rep Type)</div>
+        <p style="font-size:13px;line-height:1.7;">When Member Type = <strong>Non-Member</strong>, a Representative Details section appears. Fields vary by Representative Type selected:</p>
+        <div style="margin-top:12px;">
+          <div class="info-row"><span class="icon">🔴</span><span class="text"><strong>Legal Representative:</strong> Name lookup (searches existing EPlus authorized rep records). Disabled when no records on file for this member.</span></div>
+          <div class="info-row"><span class="icon">🟡</span><span class="text"><strong>Personal Rep → Parent:</strong> Parent lookup (existing records) + Auth Type display only.</span></div>
+          <div class="info-row"><span class="icon">🟡</span><span class="text"><strong>Personal Rep → Guardian/POA/Advocate/Other:</strong> Free-text Name + Caller Phone + Description + Auth Type + Start Date (today, auto-set) + End Date (editable).</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--red);">
+      <div class="card-header">🔴 Critical Bug — M-P1-02: Non-Phone Origins Cannot Complete Verification</div>
+      <p style="font-size:13px;line-height:1.7;">In the current Genesys LWC, the verification function requires <strong>both</strong> a Case Origin value <strong>and</strong> a Member Type value before proceeding. EPlus only shows Member Type for Inbound and Outbound Phone Calls.</p>
+      <p style="font-size:13px;line-height:1.7;margin-top:8px;">This means a CSR selecting <strong>Chat, Walk-In, Research, Transfer, Email, Fax, Voice Mail, Mail, or Meeting – Virtual</strong> can never advance to complete verification in the current LWC. <strong>This is a production bug.</strong></p>
+      <p style="font-size:13px;line-height:1.7;margin-top:8px;color:var(--green);font-weight:600;">Fix: For non-phone origins, allow Verify to proceed on Case Origin selection alone — no Member Type required.</p>
+    </div>
+
+    <div class="section-title" style="margin-top:8px;">🟢 Intentional EIDG Additions (Body 1 — Confirmed Keep)</div>
+    <div class="two-col">
+      <div class="eidg-item"><span>✅</span><span><strong>Caller Name</strong> (required, always visible) — Not in EPlus. Ensures caller identity is always captured regardless of interaction type.</span></div>
+      <div class="eidg-item"><span>✅</span><span><strong>Caller Phone</strong> (optional, ANI pre-filled from Genesys) — Not in EPlus. Reduces manual data entry; ANI auto-populates from the screen pop payload.</span></div>
+    </div>
+  </div>
+
+  <div id="tab-provider" class="tab-pane" style="display:none!important;">
+
+    <div class="section-title">🏥 Provider Verification — EPlus Reference Standard</div>
+
+    <div class="card">
+      <div class="card-header">Single-Phase Modal — Phone vs. Non-Phone Gate</div>
+      <p style="font-size:13px;line-height:1.7;margin-bottom:12px;">Unlike Member, Provider is <strong>single-phase</strong> — there is no two-phase transition. However, <strong>content shown depends entirely on Case Origin.</strong></p>
+      <div class="flow">
+        <div class="flow-step"><div class="step-label">Modal Opens</div><div class="step-text">Interaction banner + Case Origin dropdown</div></div>
+        <div class="flow-step"><div class="step-label">Phone Call Origins</div><div class="step-text">+ 6 verification checkboxes + "On behalf?" checkbox</div></div>
+        <div class="flow-step"><div class="step-label">Non-Phone Origins</div><div class="step-text">Case Origin only → Verify immediately</div></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">📋 Provider Case Origin Options (7 total)</div>
+        <table>
+          <thead><tr><th>EPlus Label / Value</th><th>Our LWC Value</th><th>Match?</th></tr></thead>
+          <tbody>
+            <tr class="row-ok"><td>Inbound - Phone Call</td><td>Inbound - Phone Call</td><td><span class="badge-ok">✓</span></td></tr>
+            <tr class="row-ok"><td>Outbound - Phone Call</td><td>Outbound - Phone Call</td><td><span class="badge-ok">✓</span></td></tr>
+            <tr class="row-ok"><td>Email</td><td>Email</td><td><span class="badge-ok">✓</span></td></tr>
+            <tr class="row-high"><td>Voice Mail</td><td>Voicemail</td><td><span class="badge-high">✗ Value</span></td></tr>
+            <tr class="row-ok"><td>Research</td><td>Research</td><td><span class="badge-ok">✓</span></td></tr>
+            <tr class="row-high"><td>Meeting – Virtual (em dash)</td><td>Meeting - Virtual (hyphen)</td><td><span class="badge-high">✗ Value</span></td></tr>
+            <tr class="row-high"><td>Meeting – In Person (em dash)</td><td>Meeting - In Person (hyphen)</td><td><span class="badge-high">✗ Value</span></td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:11px;color:var(--red);margin-top:8px;">⚠️ Value mismatches = records saved by our LWC will not match EPlus filters or reports.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-header">☑️ Verification Checkboxes (Phone Origins Only in EPlus)</div>
+        <table>
+          <thead><tr><th>EPlus Label</th><th>Required?</th><th>Our LWC Label</th><th>Match?</th></tr></thead>
+          <tbody>
+            <tr class="row-ok"><td>Provider Name</td><td>No</td><td>Provider Name</td><td><span class="badge-ok">✓</span></td></tr>
+            <tr class="row-ok"><td>Provider ID</td><td>No</td><td>Provider Id</td><td><span class="badge-ok">✓</span></td></tr>
+            <tr class="row-ok"><td>Provider TIN</td><td>No</td><td>Provider TIN</td><td><span class="badge-ok">✓</span></td></tr>
+            <tr class="row-medium"><td>Provider Contact #</td><td>No</td><td>Phone Number</td><td><span class="badge-medium">Label</span></td></tr>
+            <tr class="row-ok"><td>* Provider NPI</td><td>Yes (when data)</td><td>NPI</td><td><span class="badge-ok">✓</span></td></tr>
+            <tr class="row-ok"><td>Address</td><td>No</td><td>Provider Address</td><td><span class="badge-ok">✓</span></td></tr>
+            <tr class="row-decision"><td><em>(not in EPlus)</em></td><td>—</td><td>Provider Status</td><td><span class="badge-decision">CD-02</span></td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:11px;color:var(--text-light);margin-top:8px;">Checkbox display order also differs — reordering required to match EPlus sequence.</p>
+      </div>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--red);">
+      <div class="card-header">🔴 Critical Bug — P-01: No Phone/Non-Phone Gate in Provider LWC</div>
+      <p style="font-size:13px;line-height:1.7;">The current Provider LWC always renders all verification checkboxes and the "calling on behalf?" section regardless of Case Origin. <strong>EPlus only shows these for phone call origins.</strong> For Email, Voice Mail, Research, and Meeting origins, EPlus shows only Case Origin and Verify.</p>
+      <p style="font-size:13px;line-height:1.7;margin-top:8px;color:var(--green);font-weight:600;">Fix: Add a conditional render gate in providerVerificationModal.html — show checkboxes and on-behalf section only when Case Origin is a phone call origin.</p>
+    </div>
+
+    <div class="section-title" style="margin-top:8px;">🟢 EIDG Additions — Status</div>
+    <div class="two-col">
+      <div class="eidg-item"><span>✅</span><span><strong>Caller Name</strong> (always visible, required) — Body 1 addition. Placement and scope for non-phone origins pending <strong>CD-01</strong>.</span></div>
+      <div class="eidg-item"><span>✅</span><span><strong>Caller Phone</strong> (always visible, ANI pre-filled) — Body 1 addition. Same scope question as Caller Name (CD-01).</span></div>
+      <div class="eidg-item"><span>❓</span><span><strong>Provider Status</strong> checkbox — Not in EPlus. Keep or remove pending <strong>CD-02</strong>. Must confirm underlying field exists before deciding.</span></div>
+    </div>
+  </div>
+
+  <!-- FULL GAP ANALYSIS -->
+  <div id="tab-gaps" class="tab-pane">
+
+    <div class="section-title">📋 Complete Gap Register</div>
+    <p style="font-size:12px;color:var(--text-light);margin-bottom:14px;">Click any row to expand a full explanation of the gap, its impact, and what needs to change.</p>
+
+    <div class="filter-bar">
+      <label>Filter:</label>
+      <button class="filter-btn active" onclick="filterGaps('all', this)">All</button>
+      <button class="filter-btn" onclick="filterGaps('high', this)">🔴 High Priority</button>
+      <button class="filter-btn" onclick="filterGaps('medium', this)">🟡 Medium</button>
+      <button class="filter-btn" onclick="filterGaps('low', this)">⚪ Low / Cosmetic</button>
+      <button class="filter-btn" onclick="filterGaps('decision', this)" style="border-color:#7c3aed;color:#7c3aed;">🟣 Decision Needed</button>
+    </div>
+
+    <div class="phase-header">Member — Phase 1</div>
+    <div class="gap-table-wrap card" style="padding:0;">
+      <table>
+        <thead><tr><th style="width:90px;">Gap ID</th><th>EPlus Behavior (Standard)</th><th>Current Genesys LWC</th><th style="width:110px;">Type</th><th style="width:90px;">Priority</th></tr></thead>
         <tbody>
-            <tr>
-                <td>GenesysCTIExtensionClassV2</td>
-                <td>Apex</td>
-                <td>Screen pop entry point &mdash; parses Genesys payload, searches records</td>
-            </tr>
-            <tr>
-                <td>GC_Account_PageController</td>
-                <td>Apex</td>
-                <td>Loads Member data for verification page</td>
-            </tr>
-            <tr>
-                <td>GC_HealthcareProvider_PageController</td>
-                <td>Apex</td>
-                <td>Loads Provider data for verification page</td>
-            </tr>
-            <tr>
-                <td>VerifyMemberVisualforcePage</td>
-                <td>Visualforce</td>
-                <td>Hosts Member verification LWC</td>
-            </tr>
-            <tr>
-                <td>VerifyHealthcareProviderVisualforcePage</td>
-                <td>Visualforce</td>
-                <td>Hosts Provider verification LWC</td>
-            </tr>
-            <tr>
-                <td>verifyMember / verifyProvider</td>
-                <td>LWC</td>
-                <td>Display matched records, create Interaction, open modal</td>
-            </tr>
-            <tr>
-                <td>memberVerificationModal</td>
-                <td>LWC</td>
-                <td>Member identity verification form &amp; record creation</td>
-            </tr>
-            <tr>
-                <td>providerVerificationModal</td>
-                <td>LWC</td>
-                <td>Provider identity verification form &amp; record creation</td>
-            </tr>
+
+          <tr class="gap-row row-medium" data-priority="medium" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P1-01</td>
+            <td>Case Origin shown first, alone. Member Type only appears after selection (phone origins only).</td>
+            <td>Case Origin + Member Type shown simultaneously from modal open.</td>
+            <td>Flow sequencing</td><td><span class="badge-medium">Medium</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="medium"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus guides the CSR through two steps in sequence: first select a Case Origin, then — only if it's a phone call — select a Member Type. Our LWC presents both dropdowns simultaneously from the moment the modal opens.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Showing Member Type upfront is unnecessary and slightly misleading for non-phone interactions, since EPlus never asks for it in those cases. A CSR familiar with EPlus will notice the layout looks different from what they expect.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Show Member Type only after Case Origin has been selected and only when the selected origin is a phone call. For non-phone origins, Member Type should never appear.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-high" data-priority="high" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P1-02</td>
+            <td>Non-phone origins: Verify available immediately. No Member Type required.</td>
+            <td><strong>Non-phone paths can never complete verification</strong> — code requires both fields.</td>
+            <td>Critical bug</td><td><span class="badge-high">High</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="high"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>In EPlus, selecting a non-phone Case Origin (such as Email, Walk-In, or Research) immediately shows a Verify button — no Member Type selection is needed. In our LWC, the underlying code requires <em>both</em> a Case Origin value and a Member Type value before it unlocks the verification section. Since Member Type only appears for phone origins, non-phone CSRs are stuck — the verification section never appears for them.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>This is a production bug. Any CSR attempting to verify a member through a non-phone channel using the Genesys screen pop cannot complete the verification. The modal will appear functional but will never advance past the initial fields.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>For non-phone Case Origins, the code must allow Verify to proceed based on Case Origin alone — without requiring a Member Type selection. Member Type should only gate the flow for phone call origins.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-low" data-priority="low" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P1-03</td>
+            <td>Button: ← Go Back (left-arrow icon)</td>
+            <td>Button: Close</td>
+            <td>Label / icon</td><td><span class="badge-low">Low</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="low"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus uses a "← Go Back" button in the verification modal. Our LWC uses a "Close" button.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>"Go Back" communicates that the CSR can return to the member search results and select a different member. "Close" implies the task is being abandoned entirely. The difference is subtle but affects how CSRs mentally model the navigation.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Update the button label and add a left-arrow icon to match EPlus's "← Go Back" styling.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-low" data-priority="low" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P1-04</td>
+            <td>Case Origin option: "Walk-In" (with hyphen)</td>
+            <td>Label displays as "Walk In" (no hyphen). Stored value is correct.</td>
+            <td>Label cosmetic</td><td><span class="badge-low">Low</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="low"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus displays this option as "Walk-In" with a hyphen. Our LWC displays it as "Walk In" without one. The value saved to Salesforce is "Walk-In" in both cases — this is a display-only discrepancy.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>No data impact. The inconsistency is cosmetic but will be noticeable to CSRs comparing both screens side by side.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Update the display label in the Case Origin options list from "Walk In" to "Walk-In".</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-low" data-priority="low" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P1-05</td>
+            <td>Case Origin option: "Meeting – Virtual" (em dash)</td>
+            <td>Label displays as "Meeting - Virtual" (regular hyphen). Stored value is correct.</td>
+            <td>Label cosmetic</td><td><span class="badge-low">Low</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="low"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus displays "Meeting – Virtual" using an em dash (–). Our LWC uses a regular hyphen (-). The underlying stored value correctly uses the em dash, so no data is affected.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Display-only cosmetic difference. No functional or data impact.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Update the display label to use an em dash to match EPlus. (The stored value is already correct.)</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-low" data-priority="low" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P1-07</td>
+            <td>Interaction banner: "Interaction Number is: Int-XXXXX"</td>
+            <td>Banner reads: "Interaction: Int-XXXXX"</td>
+            <td>Label text</td><td><span class="badge-low">Low</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="low"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>The blue interaction banner at the top of the EPlus modal reads "Interaction Number is: Int-XXXXX". Our LWC's banner reads "Interaction: Int-XXXXX".</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>The same information is communicated. This is a minor wording difference with no functional impact.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Update the banner text in the LWC template to match the EPlus wording.</div>
+          </div></td></tr>
+
         </tbody>
-    </table>
+      </table>
+    </div>
+
+    <div class="phase-header">Member — Phase 2</div>
+    <div class="gap-table-wrap card" style="padding:0;">
+      <table>
+        <thead><tr><th style="width:90px;">Gap ID</th><th>EPlus Behavior (Standard)</th><th>Current Genesys LWC</th><th style="width:110px;">Type</th><th style="width:90px;">Priority</th></tr></thead>
+        <tbody>
+
+          <tr class="gap-row row-medium" data-priority="medium" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-01</td>
+            <td>"Member Details" bold section header with ⓘ icon above verification checkboxes</td>
+            <td>No section header — checkboxes appear without any label above them</td>
+            <td>Structure</td><td><span class="badge-medium">Medium</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="medium"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus places a bold "Member Details" heading with a small info icon directly above the verification checkboxes, clearly labeling what section the CSR is looking at. Our LWC jumps straight into the checkboxes with no label.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Without the header, the layout is less organized and harder to scan — especially compared to EPlus, where section headers visually separate "Member Details" from "Representative Details." CSRs who use both screens will notice the structural difference.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Add a "Member Details" section header above the verification checkbox group in the LWC template, styled to match EPlus.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-medium" data-priority="medium" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-02</td>
+            <td>"Representative Details" bold section header above rep fields</td>
+            <td>No section header — rep fields appear without any label above them</td>
+            <td>Structure</td><td><span class="badge-medium">Medium</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="medium"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus places a "Representative Details" heading above the representative type section, clearly separating it from Member Details above. Our LWC shows the Representative Type dropdown and related fields without any section label.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Without headers, the two sections blend together visually, making it harder for CSRs to mentally separate member identity verification from representative identity capture.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Add a "Representative Details" section header above the representative type fields when that section is visible (i.e., when Member Type = Non-Member).</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-medium" data-priority="medium" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-03</td>
+            <td>Data values shown without label prefixes — value only in the right column</td>
+            <td>Bold label prefixes shown: "Member Id:", "SSN:", "Member Name:", etc.</td>
+            <td>Layout</td><td><span class="badge-medium">Medium</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="medium"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>In EPlus, the right column of the verification layout shows only the raw data value — for example, just "Brandon Testing" next to the Member Name checkbox. Our LWC prefixes each value with a bold field label: "Member Name: Brandon Testing." The label is already communicated by the checkbox itself on the left side.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>The duplication makes our layout busier and visually noisier than EPlus. CSRs switching between screens will see a noticeably different information density.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Remove the bold label prefixes from the data column. Show only the raw value — the checkbox label on the left already identifies the field.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-low" data-priority="low" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-04</td>
+            <td>Phone Number rendered as a blue clickable hyperlink</td>
+            <td>Phone Number displayed as plain text</td>
+            <td>Styling</td><td><span class="badge-low">Low</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="low"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus renders the member's phone number as a blue clickable telephone link. Our LWC displays it as plain unlinked text.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Minor cosmetic difference. The clickable link adds a small convenience (tap-to-call on supported devices) but is not functionally critical.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Wrap the phone number value in an anchor tag with a <code>tel:</code> href and apply blue link styling to match EPlus.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-low" data-priority="low" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-05</td>
+            <td>Mailing Address includes a country line ("US")</td>
+            <td>Address shows street and city/state/zip only — no country line</td>
+            <td>Field content</td><td><span class="badge-low">Low</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="low"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus displays the mailing address as three lines: street, city/state/zip, and country ("US"). Our LWC shows only the first two lines.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>For the vast majority of members this makes no practical difference. It is a minor completeness gap for cosmetic parity.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Add the country field as a third line in the address display if the data is available in the Salesforce record.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-low" data-priority="low" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-06</td>
+            <td>Date of Birth formatted M/D/YYYY (no zero-padding on month or day)</td>
+            <td>Date of Birth formatted MM/DD/YYYY (zero-padded)</td>
+            <td>Date format</td><td><span class="badge-low">Low</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="low"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus displays dates of birth without zero-padding single-digit months and days — for example "6/25/2020" rather than "06/25/2020". Our LWC pads both to two digits.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Both formats convey the same date. This is a minor cosmetic difference that could cause visual inconsistency if CSRs are cross-referencing both screens.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Update the date formatting logic in the LWC to strip leading zeros from the month and day values.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-low" data-priority="low" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-10</td>
+            <td>Rep Type dropdown placeholder: "Select Representative Type"</td>
+            <td>Placeholder reads: "Select an Option" (Salesforce default)</td>
+            <td>Placeholder text</td><td><span class="badge-low">Low</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="low"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>When the Representative Type dropdown hasn't been selected yet, EPlus shows the descriptive placeholder "Select Representative Type." Our LWC doesn't specify a placeholder, so Salesforce defaults to the generic "Select an Option."</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>The generic placeholder is less informative. CSRs seeing "Select an Option" have to infer what kind of option they're selecting; "Select Representative Type" tells them exactly what to do.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Set the placeholder attribute on the Representative Type combobox to "Select Representative Type."</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-medium" data-priority="medium" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-11</td>
+            <td>Representative Type dropdown: marked required with a red asterisk</td>
+            <td>Required attribute not enforced — CSR can proceed without selecting</td>
+            <td>Required field</td><td><span class="badge-medium">Medium</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="medium"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus marks the Representative Type dropdown as required with a visible red asterisk, preventing verification from completing without a selection. Our LWC shows the dropdown but doesn't enforce it as required — a CSR could click Verify without selecting a Representative Type.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Skipping Representative Type would create an incomplete verification record with no indication of who the caller was representing. This is a data quality risk on every Non-Member verification.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Add the <code>required</code> attribute to the Representative Type combobox in the LWC template. Ensure validation prevents Verify from proceeding if it is blank.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-medium" data-priority="medium" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-12</td>
+            <td>Relationship Type dropdown: marked required with a red asterisk</td>
+            <td>Required attribute not enforced</td>
+            <td>Required field</td><td><span class="badge-medium">Medium</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="medium"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>When a CSR selects Personal Representative, EPlus immediately shows a Relationship Type dropdown marked as required. Our LWC shows the dropdown but does not enforce it, meaning a CSR could click Verify without specifying the relationship (Guardian, POA, Parent, etc.).</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Without a Relationship Type, the verification record is incomplete. The relationship type determines how EPlus handles the authorization record — skipping it means that record would be missing critical context.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Add the <code>required</code> attribute to the Relationship Type combobox and ensure the validation blocks Verify if it is blank when Personal Representative is selected.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-high" data-priority="high" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-13</td>
+            <td>Legal Representative: shows a "Name" lookup that searches existing authorized rep records on file in EPlus</td>
+            <td>Shows a free-text Description textarea only — no lookup, no connection to existing records</td>
+            <td>Structural gap</td><td><span class="badge-high">High</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="high"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>When a caller identifies as a Legal Representative, EPlus displays a searchable name lookup field populated from authorized representative records already registered in the EPlus managed package for that member. The CSR selects the representative from a list. Our LWC shows only a free-text Description textarea — there is no lookup, no list, and no connection to EPlus records.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>EPlus's lookup confirms the caller is a <em>known</em> authorized representative on file. Our textarea accepts any free text — a CSR could type anything. If this verification is ever audited, our records cannot demonstrate the representative was verified against an existing authorization.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>This is a high-complexity gap. Replicating the lookup requires identifying the EPlus managed package object that stores authorized rep records and building an Apex query to fetch records by member. This is the subject of Client Decision CD-03.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-high" data-priority="high" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-14</td>
+            <td>Personal Rep → Parent: shows a "Parent" lookup (existing records) + Auth Type read-only label</td>
+            <td>Shows Description textarea only — lookup and Auth Type display both missing</td>
+            <td>Structural gap</td><td><span class="badge-high">High</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="high"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>When the Relationship Type is "Parent," EPlus shows a "Parent" lookup field (same data-driven lookup as Legal Representative, searching existing records) alongside a read-only "Auth Type: Personal Representative" label. Our LWC shows only a Description textarea.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>The Parent relationship in EPlus is pre-registered — the system expects this person to already exist as an authorized representative. Replacing the lookup with a free-text field loses the connection to the existing authorization record.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Same as M-P2-13 — this gap is part of the CD-03 scope decision. If the lookup capability is built, the Parent path should also use it rather than a text field.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-high" data-priority="high" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-15</td>
+            <td>Personal Rep → Guardian: Name (required text), Caller Phone (required), Auth Type, Start Date (auto today), End Date (editable)</td>
+            <td>Description textarea only — five fields are missing</td>
+            <td>Structural gap</td><td><span class="badge-high">High</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="high"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>When the Relationship Type is "Guardian," EPlus shows five fields: a required free-text Name, a required Caller Phone, an optional Description, a read-only Auth Type, and both a Start Date (automatically set to today) and an editable End Date. Our LWC shows only a Description textarea — the four other fields are absent.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>The Start Date defaulting to today, along with the End Date, suggests EPlus is creating a new authorization record in real time during the verification call. Our LWC captures only unstructured notes. The structured fields (Name, Phone, dates) are what COA would rely on for auditing or future reference of the authorization.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Scope decision CD-03 covers this. At minimum, adding Name and Caller Phone as structured fields (even without creating EPlus managed records) would be a meaningful improvement over the current free-text textarea.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-high" data-priority="high" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-16</td>
+            <td>Personal Rep → County DHS / POA / Advocate / Legal Rep / Other: identical five-field layout to Guardian</td>
+            <td>Description textarea only for all five relationship types</td>
+            <td>Structural gap</td><td><span class="badge-high">High</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="high"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>County DHS, POA, Advocate, Legal Rep (under Personal Rep), and Other all show the same five fields as Guardian in EPlus: required Name, required Caller Phone, optional Description, read-only Auth Type, and Start/End dates. Our LWC shows only a Description textarea for all five.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Same as M-P2-15 — five relationship types each missing four structured fields. This represents the majority of Personal Representative verification cases in practice.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Same resolution as M-P2-15 — covered by scope decision CD-03. The fix for Guardian should extend to all five relationship types since the field set is identical.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-medium" data-priority="medium" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-17</td>
+            <td>Validation errors shown inline beneath the specific field that failed</td>
+            <td>A single error banner appears at the top of the modal</td>
+            <td>Validation UX</td><td><span class="badge-medium">Medium</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="medium"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>When a CSR clicks Verify without completing a required field, EPlus highlights the specific field with a red border and shows a message directly beneath it ("Complete this field."). Our LWC shows a single error banner at the top of the modal instead.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>A top-level banner tells the CSR something went wrong but requires them to scan the form to find which field caused the error. EPlus's inline approach points directly to the problem, reducing time and confusion — especially on longer forms with many fields.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Add inline validation messaging below each required field. When Verify is clicked, invalid fields should be highlighted with a red border and a "Complete this field." message beneath them, matching EPlus behavior.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-low" data-priority="low" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-18</td>
+            <td>Cancel: blue "× Cancel" button in the modal body alongside Verify</td>
+            <td>Close: neutral grey button in the modal footer</td>
+            <td>Button style</td><td><span class="badge-low">Low</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="low"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>In EPlus, the Cancel button is styled in blue (same as Verify) and sits inside the modal body next to the Verify button. Our LWC uses Salesforce's standard modal footer pattern with a neutral grey Close button.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Cosmetic and low impact. CSRs familiar with EPlus may notice the button placement differs, but functionality is equivalent.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Evaluate whether to move the cancel action into the modal body and apply blue styling, or accept this as an intentional Salesforce-standard deviation. Low priority.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-low" data-priority="low" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>M-P2-19</td>
+            <td>Description textarea: NOT present in EPlus for any representative type</td>
+            <td>Description textarea shown for all representative types — evaluate whether to keep</td>
+            <td>Evaluate</td><td><span class="badge-low">Evaluate</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="low"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>Our LWC includes a free-text Description textarea for all representative types. EPlus does not have an equivalent field. This was added by EIDG as an extra data capture mechanism.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>If EPlus-style structured fields are added for Guardian/POA/etc. (per CD-03), the Description textarea may become redundant or overlap with the structured Description field EPlus already shows. If parity is prioritized over EIDG enhancements, this field should be removed.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>COA should decide whether to keep Description as a supplementary notes field or remove it for stricter parity. This decision ties into CD-03.</div>
+          </div></td></tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <div class="phase-header">Provider Workflow</div>
+    <div class="gap-table-wrap card" style="padding:0;">
+      <table>
+        <thead><tr><th style="width:90px;">Gap ID</th><th>EPlus Behavior (Standard)</th><th>Current Genesys LWC</th><th style="width:110px;">Type</th><th style="width:90px;">Priority</th></tr></thead>
+        <tbody>
+
+          <tr class="gap-row row-high" data-priority="high" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>P-01</td>
+            <td>Verification checkboxes + "on behalf" section: visible for phone call origins only</td>
+            <td><strong>All fields always shown</strong> regardless of Case Origin</td>
+            <td>Critical bug</td><td><span class="badge-high">High</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="high"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus only shows the provider verification checkboxes and the "Are you calling on behalf of a provider?" section when the Case Origin is a phone call (Inbound or Outbound). For all other origins — Email, Voice Mail, Research, Meetings — EPlus shows only the Case Origin dropdown and Verify. Our LWC always shows all fields regardless of which Case Origin is selected.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>A CSR doing an Email or Research verification is presented with a full checkbox form that EPlus never shows for those channels. This is a production bug — the screen pop is showing fields that should not be there, creating confusion and inconsistency with the EPlus standard.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Add a conditional render gate in the Provider LWC: show checkboxes and the "on behalf" section only when Case Origin is Inbound Phone Call or Outbound Phone Call. All other origins should show only Case Origin and the action buttons.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-medium" data-priority="medium" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>P-02</td>
+            <td>Checkbox label: "Provider Contact #"</td>
+            <td>Checkbox label: "Phone Number"</td>
+            <td>Label mismatch</td><td><span class="badge-medium">Medium</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="medium"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>The checkbox for the provider's phone number is labeled "Provider Contact #" in EPlus. Our LWC labels the same field "Phone Number." Both refer to the same underlying data field.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>CSRs cross-referencing between EPlus and the Genesys screen pop will see different labels for the same field. "Provider Contact #" is more specific and accurate — it identifies this as the provider's contact number rather than a generic phone field.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Update the checkbox label in the Provider LWC from "Phone Number" to "Provider Contact #" to match EPlus.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-decision" data-priority="decision" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>P-03</td>
+            <td>"Provider Status" checkbox: NOT present in EPlus</td>
+            <td>Provider Status checkbox is present in the LWC</td>
+            <td>Extra field</td><td><span class="badge-decision">CD-02</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="decision"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>Our LWC includes a "Provider Status" checkbox in the verification list. EPlus does not include Provider Status as a verifiable attribute. It is unclear whether this was added intentionally or is a leftover from earlier development — it does not appear in the Body 1 change log.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>If no corresponding storage field exists on the verification record object, the checkbox captures nothing — checking it has no effect on the saved record. Before deciding to keep it, EIDG needs to confirm whether a field exists to persist this value.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>This requires Client Decision CD-02. If no storage field exists, remove the checkbox. If COA wants to keep it as an intentional EIDG addition, confirm the field exists and document it formally.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-medium" data-priority="medium" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>P-04</td>
+            <td>Checkbox order: Provider Name → Provider ID → Provider TIN → Provider Contact # → Provider NPI* → Address</td>
+            <td>Order: NPI → Provider Name → Phone Number → Provider Id → Provider TIN → Provider Status → Provider Address</td>
+            <td>Ordering</td><td><span class="badge-medium">Medium</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="medium"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus displays provider verification checkboxes in a specific order: Provider Name, Provider ID, Provider TIN, Provider Contact #, Provider NPI (required), Address. Our LWC shows them in a different sequence, with NPI first and Provider Status inserted mid-list.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>CSRs who work in EPlus and then switch to the Genesys screen pop will find the fields in a different order, which slows down verification and increases the chance of accidentally checking the wrong field. Matching EPlus's order creates a consistent muscle memory experience.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Reorder the verification checkboxes in the Provider LWC to match EPlus. NPI should move from first to fifth position. (Provider Status order to be resolved by CD-02.)</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-low" data-priority="low" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>P-05</td>
+            <td>Label reads "Case Origin *" with the asterisk after the text</td>
+            <td>Label reads "* Case Origin" with asterisk before the text (SLDS standard)</td>
+            <td>Cosmetic</td><td><span class="badge-low">Cosmetic</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="low"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus places the required asterisk after the label text: "Case Origin *." Our LWC uses the standard Salesforce SLDS required attribute convention, which renders the asterisk before the text: "* Case Origin."</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Purely cosmetic. Both indicate the field is required. This is driven by EPlus using custom label rendering versus our LWC following the Salesforce platform standard.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>No change recommended. Our LWC follows the correct Salesforce SLDS convention. Forcing non-standard asterisk placement to match EPlus is not worth the effort.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-high" data-priority="high" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>P-06</td>
+            <td>Case Origin stored value: "Voice Mail" (two words)</td>
+            <td>Stored value: "Voicemail" (one word) — data integrity risk</td>
+            <td>Value mismatch</td><td><span class="badge-high">High</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="high"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>When a CSR selects "Voicemail" in our LWC, the system saves the value "Voicemail" (one word) to the verification record. EPlus saves it as "Voice Mail" (two words). These are two distinct stored values in Salesforce.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Any Salesforce report, dashboard, or automation that filters on Case Origin = "Voice Mail" will not include records saved through our LWC — they were stored under "Voicemail." This is a data integrity issue that silently corrupts reporting across systems.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Update both the display label and the stored value in the Provider LWC from "Voicemail" to "Voice Mail." Both must match for the fix to be complete.</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-high" data-priority="high" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>P-07</td>
+            <td>Case Origin stored value: "Meeting – Virtual" (em dash)</td>
+            <td>Stored value: "Meeting - Virtual" (regular hyphen) — data integrity risk</td>
+            <td>Value mismatch</td><td><span class="badge-high">High</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="high"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus stores this Case Origin as "Meeting – Virtual" using an em dash (–). Our LWC stores it as "Meeting - Virtual" using a regular hyphen (-). Salesforce treats these as completely different values.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Same data integrity risk as P-06. Records saved by our LWC will not appear in any filter or report using the correct EPlus value. Both values are in use across the system, creating a split in the data.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Update both the display label and stored value in the Provider LWC to use the em dash: "Meeting – Virtual."</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-high" data-priority="high" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>P-08</td>
+            <td>Case Origin stored value: "Meeting – In Person" (em dash)</td>
+            <td>Stored value: "Meeting - In Person" (regular hyphen) — data integrity risk</td>
+            <td>Value mismatch</td><td><span class="badge-high">High</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="high"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>Identical issue to P-07. EPlus uses an em dash in "Meeting – In Person"; our LWC uses a regular hyphen. The two values are stored differently in Salesforce.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Same data integrity risk as P-06 and P-07.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Update both the display label and stored value in the Provider LWC to "Meeting – In Person" (em dash).</div>
+          </div></td></tr>
+
+          <tr class="gap-row row-low" data-priority="low" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>P-09</td>
+            <td>Cancel: blue "× Cancel" button in modal body alongside Verify</td>
+            <td>Close: neutral grey button in modal footer</td>
+            <td>Button style</td><td><span class="badge-low">Low</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="low"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus shows a blue Cancel button inside the modal body, visually paired with the blue Verify button. Our LWC follows the standard Salesforce modal pattern with a neutral Close button in the footer.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Minor cosmetic difference. No functional impact. CSRs familiar with EPlus may notice the button placement differs.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Low priority. Evaluate whether to relocate and restyle the Cancel button to match EPlus or accept the Salesforce-standard footer placement.</div>
+          </div></td></tr>
+
+
+          <tr class="gap-row row-low" data-priority="low" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>P-14</td>
+            <td>Interaction banner: "Interaction Number is: Int-XXXXX"</td>
+            <td>Banner reads: "Interaction: Int-XXXXX"</td>
+            <td>Label text</td><td><span class="badge-low">Low</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="low"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus's blue interaction banner reads "Interaction Number is: Int-XXXXX." Our LWC's banner reads "Interaction: Int-XXXXX."</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Same information, slightly different wording. Low priority cosmetic alignment — applies to both Member and Provider modals.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Update the banner template string in the Provider LWC to match EPlus wording.</div>
+          </div></td></tr>
+
+
+          <tr class="gap-row row-low" data-priority="low" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>P-16</td>
+            <td>Provider Contact # rendered as a blue clickable hyperlink</td>
+            <td>Displayed as plain text</td>
+            <td>Styling</td><td><span class="badge-low">Low</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="low"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus renders the provider's contact phone number as a clickable blue telephone link. Our LWC shows it as plain unlinked text.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>Minor cosmetic difference. Same as the Member phone number gap (M-P2-04).</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Wrap the phone number value in a <code>tel:</code> hyperlink with blue link styling, matching EPlus and the Member LWC fix.</div>
+          </div></td></tr>
+
+
+          <tr class="gap-row row-decision" data-priority="decision" onclick="toggleDetail(this)">
+            <td class="gap-id"><span class="chevron">▶</span>P-18</td>
+            <td>Non-phone origins: no Caller Name field displayed at all</td>
+            <td>Caller Name is always required in verify() for all origins — will block non-phone Verify after P-01 is fixed</td>
+            <td>Validation gap</td><td><span class="badge-decision">CD-01</span></td>
+          </tr>
+          <tr class="gap-detail" data-priority="decision"><td colspan="5"><div class="detail-inner">
+            <div class="detail-section"><div class="detail-label gap-label">The Gap</div>EPlus shows no Caller Name field for non-phone Case Origins (Email, Voice Mail, Research, Meetings). Our LWC shows Caller Name at the top level for all origins and the underlying code requires it before Verify can succeed. Once P-01 is fixed and the checkbox section is gated behind phone origins, a CSR doing an Email verification would still see a required Caller Name field with no way to dismiss it — blocking Verify.</div>
+            <div class="detail-section"><div class="detail-label impact-label">Why It Matters</div>This is a secondary bug that will be created by fixing P-01. It must be resolved at the same time, or the P-01 fix will trade one broken non-phone path for another. For non-phone interactions (Email, Research, etc.), there may genuinely be no "caller" — requiring a name entry is awkward and inconsistent.</div>
+            <div class="detail-section"><div class="detail-label fix-label">What Needs to Change</div>Depends on Client Decision CD-01. The options are: (A) gate Caller Name behind phone origins to fully match EPlus; (B) keep Caller Name visible but optional for non-phone origins; or (C) keep it required for all origins and explicitly diverge from EPlus. EIDG recommends Option A.</div>
+          </div></td></tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DECISIONS -->
+  <div id="tab-decisions" class="tab-pane">
+
+    <div class="section-title">🟣 Client Decisions Required</div>
+    <p style="font-size:13px;color:var(--text-light);margin-bottom:24px;">The following three decisions require COA input before implementation can proceed. Each is independent and can be discussed in any order.</p>
+
+    <!-- CD-01 -->
+    <div class="decision-card" data-cd="cd01">
+      <div class="decision-header">
+        <div>
+          <div class="decision-id">CD-01 · Provider Verification</div>
+          <div class="decision-title">Should "Caller Name" be captured for non-phone interactions?</div>
+        </div>
+        <div class="decision-status" id="status-cd01">🔴 Required before Provider work begins</div>
+      </div>
+      <div class="decision-body">
+        <p>When a CSR verifies a provider, they first select a Case Origin. Phone call origins (Inbound, Outbound) show the full verification layout including caller information fields. Non-phone origins (Email, Voice Mail, Research, Meeting – Virtual, Meeting – In Person) show <strong>only Case Origin in EPlus</strong> — no checkboxes, no caller information.</p>
+        <p style="margin-top:8px;">Our current Genesys screen pop (Body 1) added a "Caller Name" field that is always visible and always required — even for Email, Voice Mail, and Research interactions where there may be no live caller. Once the phone/non-phone gate is fixed (P-01), this required field will block non-phone verifications unless we also adjust it.</p>
+        <p style="margin-top:8px;"><strong>Note:</strong> This decision is Provider-specific. The Member modal resolves this naturally — non-phone Member verifications bypass the screen where Caller Name lives entirely.</p>
+      </div>
+      <div class="options-grid">
+        <div class="option-card recommended" data-cd="cd01" data-opt="A" onclick="selectOption(this)">
+          <div class="option-label">Option A — Full Parity <span class="rec-tag">EIDG Recommends</span><span class="option-checkmark">✓</span></div>
+          <div class="option-desc">Gate Caller Name and Phone behind phone origins. Non-phone verifications capture Case Origin only — no caller identity fields shown. Matches EPlus and is consistent with Member behavior.</div>
+        </div>
+        <div class="option-card" data-cd="cd01" data-opt="B" onclick="selectOption(this)">
+          <div class="option-label">Option B — Optional Capture<span class="option-checkmark">✓</span></div>
+          <div class="option-desc">Keep Caller Name visible for all origins but make it not required for non-phone. CSR can enter it if relevant, but is not blocked. Slight UX ambiguity when there is no live caller.</div>
+        </div>
+        <div class="option-card" data-cd="cd01" data-opt="C" onclick="selectOption(this)">
+          <div class="option-label">Option C — Always Required<span class="option-checkmark">✓</span></div>
+          <div class="option-desc">Keep current behavior — Caller Name required for every verification regardless of channel. Maximizes data capture. May be awkward for Email, Voice Mail, or Research workflows.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CD-02 -->
+    <div class="decision-card" data-cd="cd02">
+      <div class="decision-header">
+        <div>
+          <div class="decision-id">CD-02 · Provider Verification</div>
+          <div class="decision-title">Should the "Provider Status" checkbox remain?</div>
+        </div>
+        <div class="decision-status" id="status-cd02">🔴 Can be decided independently</div>
+      </div>
+      <div class="decision-body">
+        <p>Our Genesys screen pop includes a "Provider Status" checkbox in the provider verification list. <strong>EPlus does not have this checkbox</strong> — it is not part of the standard EPlus provider verification workflow.</p>
+        <p style="margin-top:8px;">Unlike Caller Name and Caller Phone (which are explicitly documented Body 1 additions), Provider Status does not appear in the Body 1 change log. It is unclear whether it was intentionally added or is a remnant of earlier development.</p>
+        <p style="margin-top:8px;"><strong>Important prerequisite:</strong> Before deciding, EIDG should confirm whether the Salesforce verification record object has a field to store a Provider Status value. If no storage field exists, the checkbox cannot save data and should be removed regardless.</p>
+      </div>
+      <div class="options-grid">
+        <div class="option-card" data-cd="cd02" data-opt="A" onclick="selectOption(this)">
+          <div class="option-label">Option A — Remove<span class="option-checkmark">✓</span></div>
+          <div class="option-desc">Remove Provider Status for full EPlus parity. Recommended if no underlying storage field exists on the verification record.</div>
+        </div>
+        <div class="option-card recommended" data-cd="cd02" data-opt="B" onclick="selectOption(this)">
+          <div class="option-label">Option B — Keep as EIDG Add <span class="rec-tag">If field exists</span><span class="option-checkmark">✓</span></div>
+          <div class="option-desc">Treat as an intentional EIDG enhancement for enhanced data capture. Document formally alongside Caller Name/Phone. Requires confirming the field exists and data saves correctly.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CD-03 -->
+    <div class="decision-card" data-cd="cd03">
+      <div class="decision-header">
+        <div>
+          <div class="decision-id">CD-03 · Member Verification</div>
+          <div class="decision-title">How should authorized representative information be captured?</div>
+        </div>
+        <div class="decision-status" id="status-cd03">🟡 Lower urgency — affects Body 2 scope significantly</div>
+      </div>
+      <div class="decision-body">
+        <p>When a caller identifies as a Non-Member (calling on behalf of a member), EPlus asks for Representative Type. Depending on the type selected, EPlus either searches <strong>existing authorized representative records on file</strong> (Legal Rep, Parent) or lets the CSR <strong>create a new authorization record in real time</strong> (Guardian, POA, Advocate, etc.) including name, phone, start date, and end date.</p>
+        <p style="margin-top:8px;">Our current Genesys screen pop shows only a free-text <strong>Description textarea</strong> for all representative types. It does not access EPlus records and does not create new authorizations.</p>
+        <p style="margin-top:8px;"><strong>Key question for COA:</strong> Does representative data entered through the Genesys screen pop need to feed back into the EPlus managed package records — or is it supplementary data captured only on the Salesforce verification record?</p>
+      </div>
+      <div class="options-grid">
+        <div class="option-card" data-cd="cd03" data-opt="A" onclick="selectOption(this)">
+          <div class="option-label">Option A — Full EPlus Parity<span class="option-checkmark">✓</span></div>
+          <div class="option-desc">Build lookups for existing EPlus auth rep records; build a form to create new records during verification. Requires access to managed package objects. <strong>High complexity.</strong></div>
+        </div>
+        <div class="option-card" data-cd="cd03" data-opt="B" onclick="selectOption(this)">
+          <div class="option-label">Option B — Partial Match<span class="option-checkmark">✓</span></div>
+          <div class="option-desc">Show Name and Caller Phone as free-text inputs (not lookups) for Guardian/POA/etc. Captures the same data points without requiring managed record creation. <strong>Medium complexity.</strong></div>
+        </div>
+        <div class="option-card recommended" data-cd="cd03" data-opt="C" onclick="selectOption(this)">
+          <div class="option-label">Option C — Keep Description <span class="rec-tag">Pending COA input</span><span class="option-checkmark">✓</span></div>
+          <div class="option-desc">Keep current Description textarea as supplementary notes. Simple, no managed package dependency. Best if rep data does not need to sync back to EPlus. <strong>No change required.</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILES & SCOPE -->
+  <div id="tab-files" class="tab-pane">
+
+    <div class="section-title">📁 Files Requiring Changes</div>
+    <div class="card">
+      <div class="phase-header" style="margin-top:0;">Member LWC Components</div>
+      <div class="file-row"><div class="file-name">memberVerificationModal.html</div><div class="file-desc">Add section headers ("Member Details", "Representative Details"); remove bold label prefixes from data column; update Rep Type placeholder text; button label/placement adjustments; date format</div></div>
+      <div class="file-row"><div class="file-name">memberVerificationModal.js</div><div class="file-desc">Fix non-phone path bug (M-P1-02); strip DOB zero-padding; add <code>required</code> on Representative Type and Relationship Type dropdowns; possibly new lookup fields (pending CD-03)</div></div>
+      <div class="file-row"><div class="file-name">memberVerificationModal.css</div><div class="file-desc">Section header styles; data column layout adjustments; phone number hyperlink styles</div></div>
+      <div class="file-row"><div class="file-name">verifyMember.html</div><div class="file-desc">Phase 1 layout restructure if sequential Case Origin → Member Type flow is implemented; Cancel/Close button placement and styling</div></div>
+
+      <div class="phase-header">Provider LWC Components</div>
+      <div class="file-row"><div class="file-name">providerVerificationModal.js</div><div class="file-desc">Phone/non-phone gate (P-01); Caller Name validation conditional on phone origin (P-18, pending CD-01); fix Case Origin values: "Voice Mail", "Meeting – Virtual", "Meeting – In Person" (P-06/07/08); rename "Phone Number" → "Provider Contact #" (P-02); Provider Status — keep or remove (P-03, pending CD-02); reorder checkboxes (P-04)</div></div>
+      <div class="file-row"><div class="file-name">providerVerificationModal.html</div><div class="file-desc">Conditional render gate for checkboxes and "on behalf" section (P-01); phone number as hyperlink (P-16); interaction banner text (P-14); Caller Name/Phone visibility for non-phone (pending CD-01)</div></div>
+      <div class="file-row"><div class="file-name">providerVerificationModal.css</div><div class="file-desc">Button styling, hyperlink styles, layout adjustments for phone/non-phone states</div></div>
+      <div class="file-row"><div class="file-name">verifyProvider.html</div><div class="file-desc">Modal shell — Cancel/Close button placement and styling (P-09); analogous to verifyMember.html for the Member modal</div></div>
+      <div class="file-row"><div class="file-name">verifyProvider.js</div><div class="file-desc">Close/cancel handling if button is relocated from footer to modal body</div></div>
+    </div>
+
+    <div class="section-title">⏳ Outstanding Sandbox Items (4 Remaining)</div>
+    <div class="pending-item"><span class="icon">⚠️</span><span><strong>Verify button behavior (both modals):</strong> Minimum checkbox count EPlus requires before Verify succeeds. Error message text. Current LWC enforces ≥ 3 (Member) and ≥ 2 (Provider) — if EPlus differs, this is a high-impact gap.</span></div>
+    <div class="pending-item"><span class="icon">⚠️</span><span><strong>Caller Type dropdown options (Provider):</strong> Need to open the dropdown and capture available options to confirm they match our LWC's list: Billing Office, Provider/Clinical Office, Hospital Staff/Facility, Other.</span></div>
+    <div class="pending-item"><span class="icon">⚠️</span><span><strong>Non-phone Verify behavior:</strong> Confirm what EPlus does when Verify is clicked with only Case Origin selected — direct record creation, toast, navigation?</span></div>
+    <div class="pending-item"><span class="icon">⚠️</span><span><strong>Provider Status storage field:</strong> Confirm whether the verification record object has a field to store Provider Status values before making the CD-02 decision.</span></div>
+  </div>
 
 </div>
 
-<footer>
-    <p>EIDG &mdash; Consulting Development for Colorado Access &nbsp;|&nbsp; Genesys + Salesforce Health Cloud Integration</p>
+<footer class="site-footer">
+  <span>COA – EIDG Genesys Conditional Rendering Initiative · Body 2 Scoping · March 25, 2026</span>
+  <span>Source: EPlus-Verify-Reverse-Engineer.md · Analyst: Jason Kuczek / EIDG Consulting LLC</span>
 </footer>
 
+<script>
+  function showTab(name, btn) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function toggleDetail(row) {
+    row.classList.toggle('open');
+    const detail = row.nextElementSibling;
+    if (detail && detail.classList.contains('gap-detail')) {
+      detail.classList.toggle('visible');
+    }
+  }
+
+  function filterGaps(priority, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#tab-gaps tbody tr.gap-row').forEach(row => {
+      const detail = row.nextElementSibling;
+      const show = priority === 'all' || row.getAttribute('data-priority') === priority;
+      row.style.display = show ? '' : 'none';
+      if (detail && detail.classList.contains('gap-detail')) {
+        if (!show) {
+          detail.style.display = 'none';
+          detail.classList.remove('visible');
+          row.classList.remove('open');
+        } else {
+          detail.style.display = '';
+        }
+      }
+    });
+  }
+</script>
 </body>
 </html>

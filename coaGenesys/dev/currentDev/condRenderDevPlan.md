@@ -113,6 +113,8 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
 
 5. **Add `verifyPhaseOne()` handler** in `memberVerificationModal.js`. This method creates a lightweight verification record with only Case Origin (no checkboxes, no caller details):
 
+   > **Dependency: D-6.** The field values passed for `callerName` and `callerPhone` below depend on the COA decision in D-6 (Member non-phone caller name behavior). If `UST_EPLUS__Caller_Name__c` is required at the object/validation-rule level, passing empty string will cause a DML error. The implementation below assumes Option A (EPlus parity — no caller name). If COA chooses Option B or C, this method must be updated to collect and pass caller identity fields.
+
    ```js
    verifyPhaseOne() {
        const recordId = this.extractRecordId(this.account);
@@ -121,6 +123,7 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
            return;
        }
        this.masterAccountId = recordId;
+       // D-6 dependency: callerName/callerPhone values depend on COA decision
        const verificationData = {
            interactionId: this.interactionId,
            callerName: '',
@@ -166,20 +169,20 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
 **RE doc ref:** M-P1-07, P-14
 **Priority:** LOW
 
-**Problem:** `memberVerificationModal.html` line 6 and `providerVerificationModal.html` line 6 display `Interaction: {interactionName}`. EPlus displays `Interaction Number is: Int-XXXXXXXXX`.
+**Problem:** `memberVerificationModal.html` line 6 and `providerVerificationModal.html` line 6 display `Interaction: {interactionName}`. EPlus displays `Interaction Number is: Int-XXXXXXXXX`. Additionally, EPlus only shows the banner when a linked interaction exists; our LWC always renders it.
 
 **Implementation steps:**
 
-1. In `memberVerificationModal.html` line 6, change:
+1. In `memberVerificationModal.html`, wrap the banner div (lines 5–7) in a conditional and update the text:
    ```html
-   <p><b>Interaction:</b> {interactionName}</p>
-   ```
-   to:
-   ```html
-   <p><b>Interaction Number is:</b> {interactionName}</p>
+   <template if:true={interactionName}>
+       <div class="interaction-name-display slds-m-around_medium slds-align_absolute-center">
+           <p><b>Interaction Number is:</b> {interactionName}</p>
+       </div>
+   </template>
    ```
 
-2. Same change in `providerVerificationModal.html` line 6.
+2. Same change in `providerVerificationModal.html` lines 5–7.
 
 ---
 
@@ -270,7 +273,11 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
 
    ```js
    get phoneTelLink() {
-       return this.account && this.account.Phone ? `tel:${this.account.Phone}` : '#';
+       if (this.account && this.account.Phone) {
+           const digits = this.account.Phone.replace(/\D/g, '');
+           return `tel:+1${digits}`;
+       }
+       return '#';
    }
    ```
 
@@ -372,9 +379,7 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
    }
    ```
 
-2. **Verify data availability:** Check whether `GC_Account_PageController.cls` already queries and serializes `PersonMailingCountry`. If not, add it to the SOQL query and serialization map.
-
-   In `GC_Account_PageController.cls`, locate the SOQL query that fetches Account fields. Add `PersonMailingCountry` to the SELECT list. Then add it to the serialized JSON map as `MailingCountry`.
+2. **Data already available — no Apex changes needed.** `GC_Account_PageController.cls` line 26 already queries `PersonMailingCountry`, and `VerifyMemberVisualforcePage.page` line 28 already maps it to `MailingCountry` in the serialized JSON. The only change required is in the JS getter above.
 
 ---
 
@@ -539,8 +544,8 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
            <lightning-combobox name="parentLookup"
                                label="Parent"
                                placeholder="Select Name"
-                               required
-                               disabled>
+                               disabled
+                               field-level-help="No authorized parent records on file for this member.">
            </lightning-combobox>
            <lightning-input label="Auth Type"
                            value="Personal Representative"
@@ -642,8 +647,8 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
            <lightning-combobox name="legalRepName"
                                label="Name"
                                placeholder="Select Name"
-                               required
-                               disabled>
+                               disabled
+                               field-level-help="No authorized representative records on file for this member.">
            </lightning-combobox>
        </div>
    </template>
@@ -670,12 +675,27 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
 
 **Implementation steps:**
 
-1. **Use `reportValidity()` on lightning-combobox and lightning-input components.** Instead of manually setting `this.errorMessage`, query the DOM elements and call their built-in `reportValidity()`:
+1. **Mark validatable inputs with `data-validate`** in the HTML templates. Add `data-validate` to every `lightning-combobox` and `lightning-input` that the CSR is expected to fill in (Case Origin, Member Type, Caller Name, Representative Type, Relationship Type, Rep Name, Rep Caller Phone). Do NOT add it to:
+   - Checkboxes (`type="checkbox"`) — validated by count, not individually
+   - Read-only fields (Auth Type, Start Date) — not user-editable
+   - Disabled fields (Parent lookup, Legal Rep lookup) — not actionable
 
-   In `verify()` before the caller name check:
+   Example for Caller Name:
+   ```html
+   <lightning-input label="Caller Name"
+                    name="callerName"
+                    value={nameValue}
+                    required
+                    data-validate
+                    onchange={handleNameChange}>
+   </lightning-input>
+   ```
+
+2. **Use `reportValidity()` scoped to `[data-validate]` elements only.** In `verify()` before the checkbox count check:
+
    ```js
-   // Let SLDS native validation handle required fields
-   const allValid = [...this.template.querySelectorAll('lightning-combobox, lightning-input')]
+   // Validate only user-editable required fields (not checkboxes, read-only, or disabled)
+   const allValid = [...this.template.querySelectorAll('[data-validate]')]
        .reduce((valid, input) => {
            input.reportValidity();
            return valid && input.checkValidity();
@@ -686,9 +706,9 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
    }
    ```
 
-2. **Remove the manual `this.errorMessage` checks** for caller name (lines 207–210). The `required` attribute on the `lightning-input` for Caller Name handles this natively via SLDS inline validation.
+3. **Remove the manual `this.errorMessage` checks** for caller name (lines 207–210). The `required` attribute on the `lightning-input` for Caller Name handles this natively via SLDS inline validation.
 
-3. **Keep the checkbox count error as a banner** — there is no SLDS inline validation pattern for "check at least N checkboxes":
+4. **Keep the checkbox count error as a banner** — there is no SLDS inline validation pattern for "check at least N checkboxes":
 
    ```js
    if (this.checkedValues.length < 3) {
@@ -698,7 +718,7 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
    this.errorMessage = '';
    ```
 
-4. Apply the same `reportValidity()` pattern in `providerVerificationModal.js` `verify()` method.
+5. Apply the same `[data-validate]` + `reportValidity()` pattern in `providerVerificationModal.js` `verify()` method.
 
 ---
 
@@ -810,7 +830,9 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
    </template>
    ```
 
-5. **Update `verify()` method** in `providerVerificationModal.js` (lines 135–170). For non-phone origins, skip caller name validation and checkbox count validation:
+5. **Update `verify()` method** in `providerVerificationModal.js` (lines 135–170). For non-phone origins, skip caller name validation and checkbox count validation.
+
+   > **Dependency: D-6.** The non-phone path passes empty `callerName`/`callerPhone`. This is EPlus parity (Option A from D-6). If `UST_EPLUS__Caller_Name__c` is required at the object level, this will fail. Same decision as Member non-phone — see D-6 for options. The Provider modal already has Caller Name gated behind `isPhoneOrigin` (Body 1 design keeps it always-visible for phone, hidden for non-phone per RE doc P-01). This explicitly implements P-18 (RE doc §3.3) — non-phone origins bypass caller name validation.
 
    ```js
    verify() {
@@ -819,7 +841,7 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
            return;
        }
 
-       // Phone origins require full verification
+       // Phone origins require full verification (P-01 gate + P-18 bypass)
        if (this.isPhoneOrigin) {
            if (!this.callerName || this.callerName.trim() === '') {
                this.errorMessage = 'Caller Name is required.';
@@ -832,6 +854,7 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
            }
        }
 
+       // D-6 dependency: callerName/callerPhone empty for non-phone (Option A)
        const verificationData = {
            interactionId: this.interactionId,
            providerId: this.providerId,
@@ -937,8 +960,11 @@ Each item below maps to one or more gaps from the RE doc gap analysis (§3). Ite
 
    ```js
    get phoneTelLink() {
-       return this.healthcareProvider && this.healthcareProvider.Phone
-           ? `tel:${this.healthcareProvider.Phone}` : '#';
+       if (this.healthcareProvider && this.healthcareProvider.Phone) {
+           const digits = this.healthcareProvider.Phone.replace(/\D/g, '');
+           return `tel:+1${digits}`;
+       }
+       return '#';
    }
    ```
 
@@ -1201,7 +1227,7 @@ EPlus does not include `Provider Status` as a verification checkbox. Our LWC doe
 
 ---
 
-### D-5. Verify Button Success/Error Behavior — EPlus Post-Submit UX
+### D-5. Verify Button Success/Error Behavior — EPlus Post-Submit UX (Impacts Navigation Design)
 
 **RE doc ref:** §1.7, §2.5
 **Status:** PENDING — not yet observed.
@@ -1211,6 +1237,28 @@ EPlus does not include `Provider Status` as a verification checkbox. Our LWC doe
 **Action:** Jason to complete a full verification in EPlus sandbox and document:
 - What happens on success (navigation, modal close, toast message?)
 - What happens on failure (error message text, placement)
+
+**Impact:** Current Genesys modals dispatch `close`, then navigate via `window.location.href`. If EPlus behaves differently (e.g., stays in modal, shows toast, returns to search), the navigation logic in `createVerificationRecord()` (both modals) and `handleModalClose()` (both parents) will need to be restructured. This should be confirmed before Phase 1 implementation is considered complete.
+
+---
+
+### D-6. Member and Provider Non-Phone Origins — Caller Name Save Behavior
+
+**RE doc ref:** §1.1.3 (Member), P-18 (Provider)
+**Status:** DECISION NEEDED from COA — **blocks A-1 step 5 and B-1 step 5.**
+
+**Problem:** For non-phone Case Origins, EPlus creates a verification record with only Case Origin populated — no caller name, no caller phone. Our `createVerificationRecord()` always writes `UST_EPLUS__Caller_Name__c`. If this field is **required at the object level** (via field definition or validation rule), passing empty string will cause a DML error at save time.
+
+This affects both Member (A-1 `verifyPhaseOne()`) and Provider (B-1 `verify()` non-phone path).
+
+**Options:**
+- **Option A — EPlus parity:** No caller name for non-phone origins. Save with empty string. Works only if `UST_EPLUS__Caller_Name__c` allows blanks.
+- **Option B — Optional:** Show Caller Name field in the non-phone view but don't require it. CSR can fill it if known. Departs from EPlus visually but preserves Body 1 data-capture philosophy.
+- **Option C — Required:** Require Caller Name even for non-phone origins. Strongest data capture, furthest from EPlus parity.
+
+**Pre-implementation test:** Before deciding, verify whether `UST_EPLUS__Caller_Name__c` is required at the object/validation-rule level. This can be checked via Setup > Object Manager > Verification Information > Fields, or by attempting a `createRecord` with an empty caller name in the browser console.
+
+**Action:** COA to decide Option A/B/C. If the field is required at the object level, Option A is not viable without a field-level change.
 
 ---
 
@@ -1257,14 +1305,15 @@ Recommended sequencing based on dependency chains and priority:
 
 ### Phase 4 — Scoping Decisions (blocked on COA input)
 
-| Item | Dependency |
-|------|------------|
-| D-1 | COA confirms EPlus auth rep object access |
-| D-2 | COA decides keep/remove Provider Status |
-| D-3 | Jason tests EPlus checkbox minimum |
-| D-4 | Jason captures EPlus Caller Type options |
-| D-5 | Jason completes EPlus full verification flow |
-| A-12 | COA confirms feasibility of legal rep lookup |
+| Item | Dependency | Blocks |
+|------|------------|--------|
+| D-6 | COA decides caller name behavior for non-phone origins + field requirement check | A-1 step 5, B-1 step 5 |
+| D-1 | COA confirms EPlus auth rep object access | A-11 backend, A-12 backend |
+| D-2 | COA decides keep/remove Provider Status | B-4 |
+| D-3 | Jason tests EPlus checkbox minimum | verify() thresholds in both modals |
+| D-4 | Jason captures EPlus Caller Type options | B-3 callerTypeOptions |
+| D-5 | Jason completes EPlus full verification flow | Navigation logic in both modals |
+| A-12 | COA confirms feasibility of legal rep lookup | Legal Rep lookup functionality |
 
 ---
 
@@ -1274,13 +1323,13 @@ All files that will be modified by this plan:
 
 | File | Items |
 |------|-------|
-| `force-app/main/default/lwc/memberVerificationModal/memberVerificationModal.js` | A-1, A-3, A-5, A-6, A-7, A-11, A-12, A-13, A-14, C-1, C-3 |
+| `force-app/main/default/lwc/memberVerificationModal/memberVerificationModal.js` | A-1, A-3, A-5, A-6, A-7, A-11, A-12, A-13, A-14, C-3 |
 | `force-app/main/default/lwc/memberVerificationModal/memberVerificationModal.html` | A-1, A-2, A-4, A-5, A-8, A-9, A-10, A-11, A-12, A-13, A-14, C-1, C-2 |
 | `force-app/main/default/lwc/memberVerificationModal/memberVerificationModal.css` | A-4, A-5 |
-| `force-app/main/default/lwc/providerVerificationModal/providerVerificationModal.js` | B-1, B-2, B-3, B-5, B-6, C-3 |
-| `force-app/main/default/lwc/providerVerificationModal/providerVerificationModal.html` | B-1, B-3, B-4, B-6, A-2 |
-| `force-app/main/default/lwc/providerVerificationModal/providerVerificationModal.css` | B-3 |
+| `force-app/main/default/lwc/providerVerificationModal/providerVerificationModal.js` | B-1, B-2, B-3, B-5, B-6, A-13, C-3 |
+| `force-app/main/default/lwc/providerVerificationModal/providerVerificationModal.html` | B-1, B-3, B-4, B-6, A-2, A-13 |
+| `force-app/main/default/lwc/providerVerificationModal/providerVerificationModal.css` | B-3, B-6 |
 | `force-app/main/default/lwc/verifyMember/verifyMember.js` | A-6, C-3 |
 | `force-app/main/default/lwc/verifyMember/verifyMember.html` | A-14 |
+| `force-app/main/default/lwc/verifyProvider/verifyProvider.js` | C-3 |
 | `force-app/main/default/lwc/verifyProvider/verifyProvider.html` | B-6 |
-| `force-app/main/default/classes/GC_Account_PageController.cls` | A-7 (if MailingCountry not already queried) |

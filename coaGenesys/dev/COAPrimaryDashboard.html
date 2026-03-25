@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COA Genesys Verification — Project Dashboard</title>
+    <style>
+        :root {
+            --primary: #0176d3;
+            --primary-dark: #014486;
+            --accent: #1b96ff;
+            --success: #2e844a;
+            --warning: #dd7a01;
+            --bg: #f4f6f9;
+            --card-bg: #ffffff;
+            --text: #181818;
+            --text-secondary: #444746;
+            --border: #d8dde6;
+            --radius: 10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: #fff;
+            padding: 2.5rem 2rem 2rem;
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 3rem;
+        }
+
+        .section-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 2px solid var(--accent);
+            display: inline-block;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary-dark);
+        }
+
+        .card p, .card li {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .card ul {
+            padding-left: 1.25rem;
+            margin-top: 0.35rem;
+        }
+
+        .card ul li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.65rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .badge-done    { background: #e3f5ec; color: var(--success); }
+        .badge-active  { background: #e1f0ff; color: var(--accent); }
+        .badge-pending { background: #fff3e0; color: var(--warning); }
+
+        /* Timeline / Phase list */
+        .phase-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .phase-list li {
+            position: relative;
+            padding: 1rem 1rem 1rem 2.5rem;
+            margin-bottom: 0.75rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .phase-list li::before {
+            content: attr(data-step);
+            position: absolute;
+            left: -0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .phase-list li strong {
+            display: block;
+            font-size: 0.95rem;
+            margin-bottom: 0.15rem;
+        }
+
+        .phase-list li span {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Roles table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.65rem 0.85rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--primary-dark);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            padding: 1.5rem 1rem;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="max-width:1100px;margin:0 auto;">
+        <h1>Colorado Access &mdash; Genesys Verification Project</h1>
+        <p>Consulting Developer: <strong>EIDG</strong> &nbsp;|&nbsp; Salesforce Health Cloud + Genesys Cloud Integration</p>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- ============================================================ -->
+    <!-- PROJECT OVERVIEW                                              -->
+    <!-- ============================================================ -->
+    <h2 class="section-title">Project Overview</h2>
+    <div class="card-grid">
+        <div class="card">
+            <h3>What Is This Project?</h3>
+            <p>
+                When a phone call comes in through Genesys Cloud, Salesforce automatically
+                "screen pops" a verification page so the CSR can confirm the caller's identity.
+                This project ensures that workflow is reliable, captures all required data,
+                and matches the experience CSRs see when they use the EPlus manual
+                verification process.
+            </p>
+        </div>
+        <div class="card">
+            <h3>Why Does It Matter?</h3>
+            <ul>
+                <li>Verification records were intermittently <strong>not saved</strong>, creating compliance gaps</li>
+                <li>Caller Name and Phone were <strong>hidden</strong> for most call types</li>
+                <li>The Genesys screen pop and EPlus manual flows show <strong>different fields</strong> in a different order, confusing CSRs</li>
+                <li>Achieving parity reduces training burden and improves audit readiness</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Two Bodies of Work</h3>
+            <p>
+                <strong>Body 1 — Remediation</strong> <span class="badge badge-done">Code Complete</span><br>
+                Fix the save-before-close race condition, make Caller Name/Phone always visible, pass ANI end-to-end, add error handling.
+            </p>
+            <p style="margin-top:0.5rem;">
+                <strong>Body 2 — Conditional Rendering Parity</strong> <span class="badge badge-active">Active</span><br>
+                Reverse-engineer the EPlus managed package UI and align the Genesys screen pop so both paths show identical fields, validations, and conditional logic.
+            </p>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CURRENT STATUS                                                -->
+    <!-- ============================================================ -->
+    <h2 class="section-title">Current Status</h2>
+    <div class="card-grid">
+        <div class="card">
+            <h3>Remediation (Body 1)</h3>
+            <ul>
+                <li><span class="badge badge-done">Done</span> Phase 1 — Core verification fixes</li>
+                <li><span class="badge badge-done">Done</span> Phase 2 — Best-practice hardening</li>
+                <li><span class="badge badge-done">Done</span> Phase 3 — Cleanup (JSENCODE, LIMIT, logging)</li>
+                <li><span class="badge badge-pending">Pending</span> Step 2.4 / 3.2 — Trigger handler refactor (separate deployment)</li>
+                <li><span class="badge badge-done">Done</span> Sandbox deployment — 30 components deployed</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Conditional Rendering Parity (Body 2)</h3>
+            <ul>
+                <li><span class="badge badge-done">Done</span> Development plan authored</li>
+                <li><span class="badge badge-active">Active</span> Reverse-engineering EPlus verification UI</li>
+                <li><span class="badge badge-pending">Pending</span> Document Member verification conditional rendering</li>
+                <li><span class="badge badge-pending">Pending</span> Document Provider verification conditional rendering</li>
+                <li><span class="badge badge-pending">Pending</span> Implement parity changes in LWC code</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- DELIVERY PLAN                                                 -->
+    <!-- ============================================================ -->
+    <h2 class="section-title">Delivery Plan</h2>
+    <ol class="phase-list">
+        <li data-step="1">
+            <strong>Reverse-Engineer EPlus Workflows</strong>
+            <span>Manually explore the EPlus Member and Provider verification UIs in the Genesys sandbox. Document every field, conditional rule, and validation observed. Cross-check against <em>Member Provider Search.docx</em>.</span>
+        </li>
+        <li data-step="2">
+            <strong>Gap Analysis</strong>
+            <span>Compare the documented EPlus behavior against the current Genesys screen pop LWCs. Identify every difference in field presence, ordering, required vs. optional status, and conditional visibility.</span>
+        </li>
+        <li data-step="3">
+            <strong>Implement Parity Changes</strong>
+            <span>Modify the LWC templates and JavaScript to match the EPlus rendering. All changes will live in the code EIDG owns (Apex controllers, VF pages, LWCs).</span>
+        </li>
+        <li data-step="4">
+            <strong>QA &amp; UAT</strong>
+            <span>Side-by-side testing of both workflows in the sandbox to verify visual and behavioral parity. Both bodies of work validated together.</span>
+        </li>
+        <li data-step="5">
+            <strong>Production Deployment</strong>
+            <span>EIDG delivers a file manifest, draft change set, and deployment instructions. COA's team executes the production deployment. EIDG provides post-deployment verification support.</span>
+        </li>
+    </ol>
+
+    <!-- ============================================================ -->
+    <!-- ROLES & RESPONSIBILITIES                                      -->
+    <!-- ============================================================ -->
+    <h2 class="section-title">Roles &amp; Responsibilities</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Area</th>
+                <th>EIDG (Consulting Developer)</th>
+                <th>Colorado Access</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Development</td>
+                <td>All code changes, testing in sandbox</td>
+                <td>Review PRs, provide feedback</td>
+            </tr>
+            <tr>
+                <td>Sandbox Access</td>
+                <td>Direct access to Genesys sandbox</td>
+                <td>Maintain sandbox configuration</td>
+            </tr>
+            <tr>
+                <td>Production Deployment</td>
+                <td>Provide file manifest, change set spec, and instructions</td>
+                <td>Execute deployment, run smoke tests</td>
+            </tr>
+            <tr>
+                <td>UAT</td>
+                <td>Test in sandbox, document results</td>
+                <td>Final sign-off on production behavior</td>
+            </tr>
+            <tr>
+                <td>PII / PHI</td>
+                <td>No direct production access (geographical / compliance constraint)</td>
+                <td>All production data access managed internally</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ============================================================ -->
+    <!-- KEY DECISIONS                                                 -->
+    <!-- ============================================================ -->
+    <h2 class="section-title">Key Decisions</h2>
+    <div class="card-grid">
+        <div class="card">
+            <h3>Save-Before-Close</h3>
+            <p>Verification records are now saved <strong>before</strong> the modal closes. If the save fails, the modal stays open with an error message and the CSR can retry.</p>
+        </div>
+        <div class="card">
+            <h3>Caller Identity Always Captured</h3>
+            <p>Caller Name is <strong>required</strong> on both Member and Provider paths. Caller Phone is optional and auto-filled from the Genesys ANI when available.</p>
+        </div>
+        <div class="card">
+            <h3>Parity by Observation</h3>
+            <p>Because COA does not own the EPlus source code, all parity decisions are based on <strong>observed runtime behavior</strong>, not assumptions about internal logic.</p>
+        </div>
+        <div class="card">
+            <h3>Phased Deployment</h3>
+            <p>The trigger handler refactor deploys <strong>separately</strong> from the call-flow fixes to reduce risk. Both bodies of work will be combined for the final production release.</p>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- COMPONENT INVENTORY (SIMPLIFIED)                              -->
+    <!-- ============================================================ -->
+    <h2 class="section-title">Components Touched</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Component</th>
+                <th>Type</th>
+                <th>Role</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>GenesysCTIExtensionClassV2</td>
+                <td>Apex</td>
+                <td>Screen pop entry point &mdash; parses Genesys payload, searches records</td>
+            </tr>
+            <tr>
+                <td>GC_Account_PageController</td>
+                <td>Apex</td>
+                <td>Loads Member data for verification page</td>
+            </tr>
+            <tr>
+                <td>GC_HealthcareProvider_PageController</td>
+                <td>Apex</td>
+                <td>Loads Provider data for verification page</td>
+            </tr>
+            <tr>
+                <td>VerifyMemberVisualforcePage</td>
+                <td>Visualforce</td>
+                <td>Hosts Member verification LWC</td>
+            </tr>
+            <tr>
+                <td>VerifyHealthcareProviderVisualforcePage</td>
+                <td>Visualforce</td>
+                <td>Hosts Provider verification LWC</td>
+            </tr>
+            <tr>
+                <td>verifyMember / verifyProvider</td>
+                <td>LWC</td>
+                <td>Display matched records, create Interaction, open modal</td>
+            </tr>
+            <tr>
+                <td>memberVerificationModal</td>
+                <td>LWC</td>
+                <td>Member identity verification form &amp; record creation</td>
+            </tr>
+            <tr>
+                <td>providerVerificationModal</td>
+                <td>LWC</td>
+                <td>Provider identity verification form &amp; record creation</td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+<footer>
+    <p>EIDG &mdash; Consulting Development for Colorado Access &nbsp;|&nbsp; Genesys + Salesforce Health Cloud Integration</p>
+</footer>
+
+</body>
+</html>

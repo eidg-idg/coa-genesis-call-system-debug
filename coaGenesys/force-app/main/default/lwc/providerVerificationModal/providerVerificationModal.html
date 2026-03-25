@@ -18,89 +18,92 @@
                     </lightning-combobox>
                 </div>
 
-                <!-- Verification Section -->
-                <div class="slds-grid slds-gutters">
-                    <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
-                        <!-- Provider Verification Options, including checkboxes with conditional asterisk -->
-                        <template for:each={verificationOptionsWithDisabled} for:item="option">
-                            <div key={option.value} class="slds-grid slds-align-center custom-checkbox-row">
-                                <div class="flex-container">
-                                    <!-- Render asterisk if required -->
-                                    <template if:true={option.showAsterisk}>
-                                        <span class="required-asterisk" aria-hidden="true">*</span>
-                                    </template>
-                                    <!-- Placeholder if no asterisk required -->
-                                    <template if:false={option.showAsterisk}>
-                                        <span class="asterisk-placeholder" aria-hidden="true"></span>
-                                    </template>
-                                    <lightning-input type="checkbox"
-                                                     label={option.label}
-                                                     name={option.value}
-                                                     disabled={option.disabled}
-                                                     onchange={handleChange}
-                                                     class="checkbox-input"></lightning-input>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- Provider Information Display including Address in Block Format -->
-                    <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
-                        <p><b>Provider NPI:</b> {healthcareProvider.NPI}</p>
-                        <p><b>Provider Name:</b> {healthcareProvider.Name}</p>
-                        <p><b>Phone Number:</b> {formattedPhoneNumber}</p>
-                        <p><b>Provider Id:</b> {healthcareProvider.ProviderId}</p>
-                        <p><b>Provider TIN:</b> {healthcareProvider.ProviderTIN}</p>
-                        <p><b>Provider Status:</b> {healthcareProvider.Status}</p>
-                        <template if:true={isAddressPresent}>
-                            <div>
-                                <p><b>Address:</b></p>
-                                <p>{healthcareProvider.ProviderStreet}</p>
-                                <p>{healthcareProvider.ProviderCity}, {healthcareProvider.ProviderState} {healthcareProvider.ProviderZip}</p>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Caller Information - always visible -->
-                <div class="slds-m-around_medium">
-                    <lightning-input type="text"
-                                    label="Caller Name"
-                                    name="callerName"
-                                    value={callerName}
-                                    required
-                                    onchange={handleInputChange}></lightning-input>
-                    <lightning-input type="text"
-                                    label="Phone Number"
-                                    name="callerPhoneNumber"
-                                    value={callerPhoneNumber}
-                                    onchange={handleInputChange}></lightning-input>
-                </div>
-
-                <!-- Are you calling on behalf of a Provider? Checkbox -->
-                <div class="slds-grid slds-grid_align-center slds-m-top_medium">
-                    <lightning-input type="checkbox"
-                                     label="Are you calling on behalf of a Provider?"
-                                     checked={isCallingOnBehalf}
-                                     onchange={handleIsCallingOnBehalfChange}></lightning-input>
-                </div>
-
-                <!-- Conditional Additional Fields (delegation-specific) -->
-                <template if:true={isCallingOnBehalf}>
+                <!-- Phone-origin: full verification flow -->
+                <template if:true={isPhoneOrigin}>
+                    <!-- Verification Section -->
                     <div class="slds-grid slds-gutters">
-                        <div class="slds-col slds-size_1-of-1 slds-p-horizontal_small">
-                            <lightning-combobox name="callerType"
-                                                label="Caller Type"
-                                                value={callerTypeValue}
-                                                options={callerTypeOptions}
-                                                onchange={handleCallerTypeChange}></lightning-combobox>
-                            <lightning-input type="text"
-                                            label="Phone Extension"
-                                            name="phoneExtension"
-                                            value={phoneExtension}
-                                            onchange={handleInputChange}></lightning-input>
+                        <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
+                            <!-- Provider Verification Options, including checkboxes with conditional asterisk -->
+                            <template for:each={verificationOptionsWithDisabled} for:item="option">
+                                <div key={option.value} class="slds-grid slds-align-center custom-checkbox-row">
+                                    <div class="flex-container">
+                                        <!-- Render asterisk if required -->
+                                        <template if:true={option.showAsterisk}>
+                                            <span class="required-asterisk" aria-hidden="true">*</span>
+                                        </template>
+                                        <!-- Placeholder if no asterisk required -->
+                                        <template if:false={option.showAsterisk}>
+                                            <span class="asterisk-placeholder" aria-hidden="true"></span>
+                                        </template>
+                                        <lightning-input type="checkbox"
+                                                         label={option.label}
+                                                         name={option.value}
+                                                         disabled={option.disabled}
+                                                         onchange={handleChange}
+                                                         class="checkbox-input"></lightning-input>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Provider Information Display including Address in Block Format -->
+                        <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
+                            <p><b>Provider NPI:</b> {healthcareProvider.NPI}</p>
+                            <p><b>Provider Name:</b> {healthcareProvider.Name}</p>
+                            <p><b>Phone Number:</b> {formattedPhoneNumber}</p>
+                            <p><b>Provider Id:</b> {healthcareProvider.ProviderId}</p>
+                            <p><b>Provider TIN:</b> {healthcareProvider.ProviderTIN}</p>
+                            <p><b>Provider Status:</b> {healthcareProvider.Status}</p>
+                            <template if:true={isAddressPresent}>
+                                <div>
+                                    <p><b>Address:</b></p>
+                                    <p>{healthcareProvider.ProviderStreet}</p>
+                                    <p>{healthcareProvider.ProviderCity}, {healthcareProvider.ProviderState} {healthcareProvider.ProviderZip}</p>
+                                </div>
+                            </template>
                         </div>
                     </div>
+
+                    <!-- Caller Information - visible for phone origins -->
+                    <div class="slds-m-around_medium">
+                        <lightning-input type="text"
+                                        label="Caller Name"
+                                        name="callerName"
+                                        value={callerName}
+                                        required
+                                        onchange={handleInputChange}></lightning-input>
+                        <lightning-input type="text"
+                                        label="Phone Number"
+                                        name="callerPhoneNumber"
+                                        value={callerPhoneNumber}
+                                        onchange={handleInputChange}></lightning-input>
+                    </div>
+
+                    <!-- Are you calling on behalf of a Provider? Checkbox -->
+                    <div class="slds-grid slds-grid_align-center slds-m-top_medium">
+                        <lightning-input type="checkbox"
+                                         label="Are you calling on behalf of a Provider?"
+                                         checked={isCallingOnBehalf}
+                                         onchange={handleIsCallingOnBehalfChange}></lightning-input>
+                    </div>
+
+                    <!-- Conditional Additional Fields (delegation-specific) -->
+                    <template if:true={isCallingOnBehalf}>
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-size_1-of-1 slds-p-horizontal_small">
+                                <lightning-combobox name="callerType"
+                                                    label="Caller Type"
+                                                    value={callerTypeValue}
+                                                    options={callerTypeOptions}
+                                                    onchange={handleCallerTypeChange}></lightning-combobox>
+                                <lightning-input type="text"
+                                                label="Phone Extension"
+                                                name="phoneExtension"
+                                                value={phoneExtension}
+                                                onchange={handleInputChange}></lightning-input>
+                            </div>
+                        </div>
+                    </template>
                 </template>
 
                 <!-- Error message display -->

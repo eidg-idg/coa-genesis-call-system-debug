@@ -29,10 +29,10 @@ export default class ProviderVerificationModal extends LightningElement {
             { label: 'Inbound - Phone Call', value: 'Inbound - Phone Call' },
             { label: 'Outbound - Phone Call', value: 'Outbound - Phone Call' },
             { label: 'Email', value: 'Email' },
-            { label: 'Voicemail', value: 'Voicemail' },
+            { label: 'Voice Mail', value: 'Voice Mail' },
             { label: 'Research', value: 'Research' },
-            { label: 'Meeting - Virtual', value: 'Meeting - Virtual' },
-            { label: 'Meeting - In Person', value: 'Meeting - In Person' }
+            { label: 'Meeting – Virtual', value: 'Meeting – Virtual' },
+            { label: 'Meeting – In Person', value: 'Meeting – In Person' }
         ];
     }
 
@@ -43,6 +43,11 @@ export default class ProviderVerificationModal extends LightningElement {
             { label: 'Hospital Staff/Facility', value: 'Hospital Staff/Facility' },
             { label: 'Other', value: 'Other' }
         ];
+    }
+
+    get isPhoneOrigin() {
+        return this.caseOriginValue === 'Inbound - Phone Call' ||
+               this.caseOriginValue === 'Outbound - Phone Call';
     }
 
     get verifyButtonLabel() {
@@ -117,6 +122,11 @@ export default class ProviderVerificationModal extends LightningElement {
 
     handleCaseOriginChange(event) {
         this.caseOriginValue = event.detail.value;
+        if (!this.isPhoneOrigin) {
+            this.checkedValues = [];
+            this.isCallingOnBehalf = false;
+            this.errorMessage = '';
+        }
     }
 
     handleIsCallingOnBehalfChange(event) {
@@ -145,28 +155,32 @@ export default class ProviderVerificationModal extends LightningElement {
             return;
         }
 
-        // Validate caller name is provided
-        if (!this.callerName || this.callerName.trim() === '') {
-            this.errorMessage = 'Caller Name is required.';
-            return;
+        // Phone origins require full verification (P-01 gate + P-18 bypass)
+        if (this.isPhoneOrigin) {
+            if (!this.callerName || this.callerName.trim() === '') {
+                this.errorMessage = 'Caller Name is required.';
+                return;
+            }
+
+            if (this.checkedValues.length < 2) {
+                this.errorMessage = "Please select at least two verification options to proceed.";
+                return;
+            }
         }
 
-        if (this.checkedValues.length >= 2) {
-            const verificationData = {
-                interactionId: this.interactionId,
-                providerId: this.providerId,
-                caseOrigin: this.caseOriginValue,
-                callerName: this.callerName,
-                callerPhone: this.callerPhoneNumber,
-            };
-            console.log('Verification Data:', JSON.stringify(verificationData));
+        // D-6 dependency: callerName/callerPhone empty for non-phone (Option A)
+        const verificationData = {
+            interactionId: this.interactionId,
+            providerId: this.providerId,
+            caseOrigin: this.caseOriginValue,
+            callerName: this.isPhoneOrigin ? this.callerName : '',
+            callerPhone: this.isPhoneOrigin ? this.callerPhoneNumber : '',
+        };
+        console.log('Verification Data:', JSON.stringify(verificationData));
 
-            this.isSaving = true;
-            this.errorMessage = '';
-            this.createVerificationRecord(verificationData);
-        } else {
-            this.errorMessage = "Please select at least two verification options to proceed.";
-        }
+        this.isSaving = true;
+        this.errorMessage = '';
+        this.createVerificationRecord(verificationData);
     }
 
     createVerificationRecord(data) {

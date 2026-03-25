@@ -23,10 +23,12 @@ export default class MemberVerificationModal extends LightningElement {
     relationshipTypeValue = '';
     showRepresentativeDetails = false;
     showRelationshipType = false;
-    showAdditionalFields = false;
     nameValue = '';
     callerPhoneValue = '';
     descriptionValue = '';
+    repNameValue = '';
+    repCallerPhoneValue = '';
+    endDateValue = '';
     isSaving = false;
     errorMessage = '';
 
@@ -46,6 +48,15 @@ export default class MemberVerificationModal extends LightningElement {
         ];
     }
 
+    get isPhoneOrigin() {
+        return this.caseOriginValue === 'Inbound - Phone Call' ||
+               this.caseOriginValue === 'Outbound - Phone Call';
+    }
+
+    get showPhaseOneVerify() {
+        return this.caseOriginValue && !this.isPhoneOrigin;
+    }
+
     renderedCallback() {
         console.log('Rendered Callback - Interaction ID:', this.interactionId);
         console.log('Rendered Callback - Interaction Name:', this.interactionName);
@@ -56,6 +67,28 @@ export default class MemberVerificationModal extends LightningElement {
             { label: 'Member', value: 'Member' },
             { label: 'Non-Member', value: 'Non-Member' },
         ];
+    }
+
+    get isParentRelationship() {
+        return this.relationshipTypeValue === 'Parent';
+    }
+
+    get isNonParentPersonalRep() {
+        return this.showRelationshipType &&
+               this.relationshipTypeValue &&
+               this.relationshipTypeValue !== 'Parent';
+    }
+
+    get isLegalRepresentative() {
+        return this.representativeTypeValue === 'Legal Representative';
+    }
+
+    get todayDateString() {
+        const today = new Date();
+        const m = today.getMonth() + 1;
+        const d = today.getDate();
+        const y = today.getFullYear();
+        return `${m}/${d}/${y}`;
     }
 
     get isMailingAddressPresent() {
@@ -147,6 +180,10 @@ export default class MemberVerificationModal extends LightningElement {
 
     handleCaseOriginChange(event) {
         this.caseOriginValue = event.detail.value;
+        if (!this.isPhoneOrigin) {
+            this.memberTypeValue = '';
+            this.showRepresentativeDetails = false;
+        }
         this.checkSelectionsAndDisplayVerification();
     }
 
@@ -159,11 +196,17 @@ export default class MemberVerificationModal extends LightningElement {
     handleRepresentativeTypeChange(event) {
         this.representativeTypeValue = event.detail.value;
         this.showRelationshipType = this.representativeTypeValue === 'Personal Representative';
-        this.showAdditionalFields = true;
+        this.relationshipTypeValue = '';
+        this.repNameValue = '';
+        this.repCallerPhoneValue = '';
+        this.descriptionValue = '';
     }
 
     handleRelationshipTypeChange(event) {
         this.relationshipTypeValue = event.detail.value;
+        if (!this.endDateValue) {
+            this.endDateValue = new Date().toISOString().split('T')[0];
+        }
     }
 
     handleNameChange(event) {
@@ -178,8 +221,20 @@ export default class MemberVerificationModal extends LightningElement {
         this.descriptionValue = event.target.value;
     }
 
+    handleRepNameChange(event) {
+        this.repNameValue = event.target.value;
+    }
+
+    handleRepCallerPhoneChange(event) {
+        this.repCallerPhoneValue = event.target.value;
+    }
+
+    handleEndDateChange(event) {
+        this.endDateValue = event.target.value;
+    }
+
     checkSelectionsAndDisplayVerification() {
-        if (this.caseOriginValue && this.memberTypeValue) {
+        if (this.caseOriginValue && this.isPhoneOrigin && this.memberTypeValue) {
             this.showDropdowns = false;
             this.showVerificationSection = true;
         }
@@ -192,6 +247,27 @@ export default class MemberVerificationModal extends LightningElement {
         } else if (!checked && this.checkedValues.includes(name)) {
             this.checkedValues = this.checkedValues.filter(value => value !== name);
         }
+    }
+
+    verifyPhaseOne() {
+        const recordId = this.extractRecordId(this.account);
+        if (!recordId) {
+            this.errorMessage = "Unable to identify the member record.";
+            return;
+        }
+        this.masterAccountId = recordId;
+        // D-6 dependency: callerName/callerPhone values depend on COA decision
+        const verificationData = {
+            interactionId: this.interactionId,
+            callerName: '',
+            accountId: this.masterAccountId,
+            caseOrigin: this.caseOriginValue,
+            representativeType: '',
+            callerPhone: '',
+        };
+        this.isSaving = true;
+        this.errorMessage = '';
+        this.createVerificationRecord(verificationData);
     }
 
     verify() {

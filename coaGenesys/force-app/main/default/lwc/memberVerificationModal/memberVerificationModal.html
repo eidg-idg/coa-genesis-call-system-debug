@@ -16,12 +16,24 @@
                                         onchange={handleCaseOriginChange}>
                     </lightning-combobox>
 
-                    <lightning-combobox name="memberType"
-                                        label="Member Type"
-                                        value={memberTypeValue}
-                                        options={memberTypeOptions}
-                                        onchange={handleMemberTypeChange}>
-                    </lightning-combobox>
+                    <template if:true={isPhoneOrigin}>
+                        <lightning-combobox name="memberType"
+                                            label="Member Type"
+                                            value={memberTypeValue}
+                                            options={memberTypeOptions}
+                                            onchange={handleMemberTypeChange}>
+                        </lightning-combobox>
+                    </template>
+
+                    <template if:true={showPhaseOneVerify}>
+                        <div class="slds-grid slds-grid_align-center slds-m-top_medium">
+                            <lightning-button label="Verify" variant="brand"
+                                              icon-name="utility:check"
+                                              onclick={verifyPhaseOne}
+                                              disabled={isSaving}>
+                            </lightning-button>
+                        </div>
+                    </template>
                 </template>
 
                 <!-- Verification Section, shown after dropdown selections are made -->
@@ -108,15 +120,73 @@
                     </template>
                 </template>
 
-                <!-- Additional Fields Section (Non-Member specific) -->
-                <template if:true={showAdditionalFields}>
+                <!-- Legal Representative — disabled lookup (A-12) -->
+                <template if:true={isLegalRepresentative}>
                     <div class="slds-m-around_medium">
+                        <lightning-combobox name="legalRepName"
+                                            label="Name"
+                                            placeholder="Select Name"
+                                            disabled
+                                            field-level-help="No authorized representative records on file for this member.">
+                        </lightning-combobox>
+                    </div>
+                </template>
+
+                <!-- Parent Relationship — disabled lookup + Auth Type -->
+                <template if:true={isParentRelationship}>
+                    <div class="slds-m-around_medium">
+                        <lightning-combobox name="parentLookup"
+                                            label="Parent"
+                                            placeholder="Select Name"
+                                            disabled
+                                            field-level-help="No authorized parent records on file for this member.">
+                        </lightning-combobox>
+                        <lightning-input label="Auth Type"
+                                        value="Personal Representative"
+                                        read-only
+                                        class="slds-m-top_small">
+                        </lightning-input>
+                    </div>
+                </template>
+
+                <!-- Non-Parent Personal Rep — full field set -->
+                <template if:true={isNonParentPersonalRep}>
+                    <div class="slds-m-around_medium">
+                        <lightning-input label="Name"
+                                        name="repName"
+                                        value={repNameValue}
+                                        required
+                                        onchange={handleRepNameChange}>
+                        </lightning-input>
+                        <lightning-input label="Caller Phone"
+                                        name="repCallerPhone"
+                                        value={repCallerPhoneValue}
+                                        required
+                                        onchange={handleRepCallerPhoneChange}>
+                        </lightning-input>
                         <lightning-textarea label="Description"
                                             name="description"
                                             value={descriptionValue}
                                             onchange={handleDescriptionChange}
                                             rows="3">
                         </lightning-textarea>
+                        <lightning-input label="Auth Type"
+                                        value="Personal Representative"
+                                        read-only
+                                        class="slds-m-top_small">
+                        </lightning-input>
+                        <lightning-input label="Start Date"
+                                        value={todayDateString}
+                                        read-only
+                                        class="slds-m-top_small">
+                        </lightning-input>
+                        <lightning-input type="date"
+                                        label="End Date"
+                                        name="endDate"
+                                        value={endDateValue}
+                                        onchange={handleEndDateChange}
+                                        class="slds-m-top_small">
+                        </lightning-input>
                     </div>
                 </template>
 

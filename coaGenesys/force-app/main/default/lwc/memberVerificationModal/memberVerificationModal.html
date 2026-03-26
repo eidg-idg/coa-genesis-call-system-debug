@@ -109,31 +109,41 @@
                         <span class="slds-text-heading_small slds-text-title_bold">Representative Details</span>
                     </div>
                     <div class="slds-m-around_medium">
-                        <lightning-combobox name="representativeType"
-                                            label="Representative Type"
-                                            value={representativeTypeValue}
-                                            placeholder="Select Representative Type"
-                                            options={representativeTypeOptions}
-                                            required
-                                            variant="label-inline"
-                                            data-validate
-                                            onchange={handleRepresentativeTypeChange}>
-                        </lightning-combobox>
+                        <div class="field-row">
+                            <span class="field-label"><abbr class="slds-required" title="required">*</abbr>Representative Type</span>
+                            <div class="field-control">
+                                <lightning-combobox name="representativeType"
+                                                    label="Representative Type"
+                                                    value={representativeTypeValue}
+                                                    placeholder="Select Representative Type"
+                                                    options={representativeTypeOptions}
+                                                    required
+                                                    variant="label-hidden"
+                                                    data-validate
+                                                    onchange={handleRepresentativeTypeChange}>
+                                </lightning-combobox>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Relationship Type Dropdown, shown for Personal Representative -->
                     <template if:true={showRelationshipType}>
                         <div class="slds-m-around_medium">
-                            <lightning-combobox name="relationshipType"
-                                                label="Relationship Type"
-                                                value={relationshipTypeValue}
-                                                placeholder="Select Relationship Type"
-                                                options={relationshipTypeOptions}
-                                                required
-                                                variant="label-inline"
-                                                data-validate
-                                                onchange={handleRelationshipTypeChange}>
-                            </lightning-combobox>
+                            <div class="field-row">
+                                <span class="field-label"><abbr class="slds-required" title="required">*</abbr>Relationship Type</span>
+                                <div class="field-control">
+                                    <lightning-combobox name="relationshipType"
+                                                        label="Relationship Type"
+                                                        value={relationshipTypeValue}
+                                                        placeholder="Select Relationship Type"
+                                                        options={relationshipTypeOptions}
+                                                        required
+                                                        variant="label-hidden"
+                                                        data-validate
+                                                        onchange={handleRelationshipTypeChange}>
+                                    </lightning-combobox>
+                                </div>
+                            </div>
                         </div>
                     </template>
                 </template>
@@ -141,62 +151,82 @@
                 <!-- Legal Representative — disabled lookup (A-12) -->
                 <template if:true={isLegalRepresentative}>
                     <div class="slds-m-around_medium">
-                        <lightning-combobox name="legalRepName"
-                                            label="Name"
-                                            placeholder="Select Name"
-                                            disabled
-                                            variant="label-inline"
-                                            field-level-help="No authorized representative records on file for this member.">
-                        </lightning-combobox>
+                        <div class="field-row">
+                            <span class="field-label"><abbr class="slds-required" title="required">*</abbr>Name</span>
+                            <div class="field-control">
+                                <lightning-combobox name="legalRepName"
+                                                    label="Name"
+                                                    placeholder="Select Name"
+                                                    disabled
+                                                    variant="label-hidden"
+                                                    field-level-help="No authorized representative records on file for this member.">
+                                </lightning-combobox>
+                            </div>
+                        </div>
                     </div>
                 </template>
 
                 <!-- Personal Representative — full field set (all relationship types) -->
                 <template if:true={showPersonalRepFields}>
                     <div class="slds-m-around_medium">
-                        <lightning-input label="Name"
-                                        name="repName"
-                                        value={repNameValue}
-                                        required
-                                        variant="label-inline"
-                                        data-validate
-                                        onchange={handleRepNameChange}>
-                        </lightning-input>
-                        <lightning-input label="Caller Phone"
-                                        name="repCallerPhone"
-                                        value={repCallerPhoneValue}
-                                        required
-                                        variant="label-inline"
-                                        data-validate
-                                        onchange={handleRepCallerPhoneChange}>
-                        </lightning-input>
-                        <lightning-textarea label="Description"
-                                            name="description"
-                                            value={descriptionValue}
-                                            variant="label-inline"
-                                            onchange={handleDescriptionChange}
-                                            rows="3">
-                        </lightning-textarea>
-                        <lightning-input label="Auth Type"
-                                        value="Personal Representative"
-                                        read-only
-                                        variant="label-inline"
-                                        class="slds-m-top_small">
-                        </lightning-input>
-                        <lightning-input label="Start Date"
-                                        value={todayDateString}
-                                        read-only
-                                        variant="label-inline"
-                                        class="slds-m-top_small">
-                        </lightning-input>
-                        <lightning-input type="date"
-                                        label="End Date"
-                                        name="endDate"
-                                        value={endDateValue}
-                                        variant="label-inline"
-                                        onchange={handleEndDateChange}
-                                        class="slds-m-top_small">
-                        </lightning-input>
+                        <div class="field-row">
+                            <span class="field-label"><abbr class="slds-required" title="required">*</abbr>Name</span>
+                            <div class="field-control">
+                                <lightning-input label="Name"
+                                                name="repName"
+                                                value={repNameValue}
+                                                required
+                                                variant="label-hidden"
+                                                data-validate
+                                                onchange={handleRepNameChange}>
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label"><abbr class="slds-required" title="required">*</abbr>Caller Phone</span>
+                            <div class="field-control">
+                                <lightning-input label="Caller Phone"
+                                                name="repCallerPhone"
+                                                value={repCallerPhoneValue}
+                                                required
+                                                variant="label-hidden"
+                                                data-validate
+                                                onchange={handleRepCallerPhoneChange}>
+                                </lightning-input>
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">Description</span>
+                            <div class="field-control">
+                                <lightning-textarea label="Description"
+                                                    name="description"
+                                                    value={descriptionValue}
+                                                    variant="label-hidden"
+                                                    onchange={handleDescriptionChange}
+                                                    rows="3">
+                                </lightning-textarea>
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">Auth Type</span>
+                            <span class="field-value">Personal Representative</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">Start Date</span>
+                            <span class="field-value">{todayDateString}</span>
+                        </div>
+                        <div class="field-row">
+                            <span class="field-label">End Date</span>
+                            <div class="field-control">
+                                <lightning-input type="date"
+                                                label="End Date"
+                                                name="endDate"
+                                                value={endDateValue}
+                                                variant="label-hidden"
+                                                onchange={handleEndDateChange}>
+                                </lightning-input>
+                            </div>
+                        </div>
                     </div>
                 </template>
 

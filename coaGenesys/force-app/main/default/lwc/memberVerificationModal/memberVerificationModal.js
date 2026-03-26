@@ -372,6 +372,10 @@ export default class MemberVerificationModal extends LightningElement {
             });
     }
 
+    handleGoBack() {
+        this.dispatchEvent(new CustomEvent('close'));
+    }
+
     handleCancel() {
         this.dispatchEvent(new CustomEvent('close'));
     }

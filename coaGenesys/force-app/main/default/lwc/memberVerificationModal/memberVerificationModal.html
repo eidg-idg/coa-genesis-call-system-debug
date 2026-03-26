@@ -1,13 +1,7 @@
 <!-- memberVerificationModal.html -->
 <template>
     <div class="host-container">
-        <lightning-card title="Verify Member" icon-name="custom:custom14">
-            <template if:true={interactionName}>
-                <div class="interaction-name-display slds-m-around_medium slds-align_absolute-center">
-                    <p><b>Interaction Number is:</b> {interactionName}</p>
-                </div>
-            </template>
-
+        <lightning-card>
             <div class="slds-m-around_medium">
                 <!-- Conditionally render dropdowns -->
                 <template if:true={showDropdowns}>
@@ -32,6 +26,7 @@
                     </template>
 
                     <template if:true={showPhaseOneVerify}>
+                        <hr class="slds-m-vertical_medium" />
                         <div class="slds-grid slds-grid_align-center slds-m-top_medium">
                             <lightning-button label="Verify" variant="brand"
                                               icon-name="utility:check"
@@ -40,10 +35,25 @@
                             </lightning-button>
                         </div>
                     </template>
+
+                    <template if:false={showPhaseOneVerify}>
+                        <hr class="slds-m-vertical_medium" />
+                        <div class="slds-grid slds-grid_align-center slds-m-top_medium">
+                            <lightning-button label="Go Back" variant="brand"
+                                              icon-name="utility:back"
+                                              onclick={handleGoBack}>
+                            </lightning-button>
+                        </div>
+                    </template>
                 </template>
 
                 <!-- Verification Section, shown after dropdown selections are made -->
                 <template if:true={showVerificationSection}>
+                    <template if:true={interactionName}>
+                        <div class="interaction-name-display slds-m-bottom_medium slds-align_absolute-center">
+                            <p><b>Interaction Number is:</b> {interactionName}</p>
+                        </div>
+                    </template>
                     <div class="slds-m-bottom_small section-header">
                         <span class="slds-text-heading_small slds-text-title_bold">Member Details</span>
                         <lightning-icon icon-name="utility:info" size="xx-small"
@@ -222,19 +232,21 @@
                     </div>
                 </template>
 
-                <!-- Action buttons -->
-                <div class="slds-grid slds-grid_align-center slds-m-top_medium">
-                    <lightning-button label="Cancel" variant="brand"
-                                      icon-name="utility:close"
-                                      onclick={handleCancel}
-                                      class="slds-m-right_small">
-                    </lightning-button>
-                    <lightning-button label={verifyButtonLabel} variant="brand"
-                                      icon-name="utility:check"
-                                      onclick={verify}
-                                      disabled={isSaving}>
-                    </lightning-button>
-                </div>
+                <!-- Action buttons — only visible during verification phase -->
+                <template if:true={showVerificationSection}>
+                    <div class="slds-grid slds-grid_align-center slds-m-top_medium">
+                        <lightning-button label="Cancel" variant="brand"
+                                          icon-name="utility:close"
+                                          onclick={handleCancel}
+                                          class="slds-m-right_small">
+                        </lightning-button>
+                        <lightning-button label={verifyButtonLabel} variant="brand"
+                                          icon-name="utility:check"
+                                          onclick={verify}
+                                          disabled={isSaving}>
+                        </lightning-button>
+                    </div>
+                </template>
             </div>
         </lightning-card>
     </div>

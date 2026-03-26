@@ -146,25 +146,8 @@
                     </div>
                 </template>
 
-                <!-- Parent Relationship — disabled lookup + Auth Type -->
-                <template if:true={isParentRelationship}>
-                    <div class="slds-m-around_medium">
-                        <lightning-combobox name="parentLookup"
-                                            label="Parent"
-                                            placeholder="Select Name"
-                                            disabled
-                                            field-level-help="No authorized parent records on file for this member.">
-                        </lightning-combobox>
-                        <lightning-input label="Auth Type"
-                                        value="Personal Representative"
-                                        read-only
-                                        class="slds-m-top_small">
-                        </lightning-input>
-                    </div>
-                </template>
-
-                <!-- Non-Parent Personal Rep — full field set -->
-                <template if:true={isNonParentPersonalRep}>
+                <!-- Personal Representative — full field set (all relationship types) -->
+                <template if:true={showPersonalRepFields}>
                     <div class="slds-m-around_medium">
                         <lightning-input label="Name"
                                         name="repName"
@@ -202,25 +185,6 @@
                                         value={endDateValue}
                                         onchange={handleEndDateChange}
                                         class="slds-m-top_small">
-                        </lightning-input>
-                    </div>
-                </template>
-
-                <!-- Caller Information — shown after Representative Type is selected -->
-                <template if:true={showCallerInfo}>
-                    <div class="slds-m-around_medium">
-                        <lightning-input label="Caller Name"
-                                         name="callerName"
-                                         value={nameValue}
-                                         required
-                                         data-validate
-                                         onchange={handleNameChange}>
-                        </lightning-input>
-
-                        <lightning-input label="Caller Phone"
-                                         name="callerPhone"
-                                         value={callerPhoneValue}
-                                         onchange={handleCallerPhoneChange}>
                         </lightning-input>
                     </div>
                 </template>

@@ -54,9 +54,7 @@ export default class MemberVerificationModal extends LightningElement {
     }
 
     get showCallerInfo() {
-        return this.showVerificationSection &&
-               this.memberTypeValue === 'Non-Member' &&
-               !!this.representativeTypeValue;
+        return false;
     }
 
     get showPhaseOneVerify() {
@@ -75,14 +73,9 @@ export default class MemberVerificationModal extends LightningElement {
         ];
     }
 
-    get isParentRelationship() {
-        return this.relationshipTypeValue === 'Parent';
-    }
-
-    get isNonParentPersonalRep() {
+    get showPersonalRepFields() {
         return this.showRelationshipType &&
-               this.relationshipTypeValue &&
-               this.relationshipTypeValue !== 'Parent';
+               !!this.relationshipTypeValue;
     }
 
     get isLegalRepresentative() {

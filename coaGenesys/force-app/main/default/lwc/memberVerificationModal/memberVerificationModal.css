@@ -71,6 +71,14 @@ pre {
     text-decoration: underline;
 }
 
+lightning-combobox .slds-form-element__label,
+lightning-input .slds-form-element__label,
+lightning-textarea .slds-form-element__label {
+    width: 40%;
+    max-width: 40%;
+    flex: 0 0 40%;
+}
+
 .dropdown-section lightning-combobox {
     max-width: 50%;
     display: block;

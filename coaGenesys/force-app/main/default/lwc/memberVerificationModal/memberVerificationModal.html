@@ -5,6 +5,7 @@
             <div class="slds-m-around_medium">
                 <!-- Conditionally render dropdowns -->
                 <template if:true={showDropdowns}>
+                <div class="dropdown-section">
                     <lightning-combobox name="caseOrigin"
                                         label="Case Origin"
                                         value={caseOriginValue}
@@ -45,6 +46,7 @@
                             </lightning-button>
                         </div>
                     </template>
+                </div>
                 </template>
 
                 <!-- Verification Section, shown after dropdown selections are made -->
@@ -113,6 +115,7 @@
                                             placeholder="Select Representative Type"
                                             options={representativeTypeOptions}
                                             required
+                                            variant="label-inline"
                                             data-validate
                                             onchange={handleRepresentativeTypeChange}>
                         </lightning-combobox>
@@ -127,6 +130,7 @@
                                                 placeholder="Select Relationship Type"
                                                 options={relationshipTypeOptions}
                                                 required
+                                                variant="label-inline"
                                                 data-validate
                                                 onchange={handleRelationshipTypeChange}>
                             </lightning-combobox>
@@ -141,6 +145,7 @@
                                             label="Name"
                                             placeholder="Select Name"
                                             disabled
+                                            variant="label-inline"
                                             field-level-help="No authorized representative records on file for this member.">
                         </lightning-combobox>
                     </div>
@@ -153,6 +158,7 @@
                                         name="repName"
                                         value={repNameValue}
                                         required
+                                        variant="label-inline"
                                         data-validate
                                         onchange={handleRepNameChange}>
                         </lightning-input>
@@ -160,29 +166,34 @@
                                         name="repCallerPhone"
                                         value={repCallerPhoneValue}
                                         required
+                                        variant="label-inline"
                                         data-validate
                                         onchange={handleRepCallerPhoneChange}>
                         </lightning-input>
                         <lightning-textarea label="Description"
                                             name="description"
                                             value={descriptionValue}
+                                            variant="label-inline"
                                             onchange={handleDescriptionChange}
                                             rows="3">
                         </lightning-textarea>
                         <lightning-input label="Auth Type"
                                         value="Personal Representative"
                                         read-only
+                                        variant="label-inline"
                                         class="slds-m-top_small">
                         </lightning-input>
                         <lightning-input label="Start Date"
                                         value={todayDateString}
                                         read-only
+                                        variant="label-inline"
                                         class="slds-m-top_small">
                         </lightning-input>
                         <lightning-input type="date"
                                         label="End Date"
                                         name="endDate"
                                         value={endDateValue}
+                                        variant="label-inline"
                                         onchange={handleEndDateChange}
                                         class="slds-m-top_small">
                         </lightning-input>

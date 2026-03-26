@@ -71,7 +71,7 @@ pre {
     text-decoration: underline;
 }
 
-lightning-combobox {
+.dropdown-section lightning-combobox {
     max-width: 50%;
     display: block;
     margin-left: auto;

@@ -54,7 +54,9 @@ export default class MemberVerificationModal extends LightningElement {
     }
 
     get showCallerInfo() {
-        return this.showVerificationSection && this.memberTypeValue === 'Non-Member';
+        return this.showVerificationSection &&
+               this.memberTypeValue === 'Non-Member' &&
+               !!this.representativeTypeValue;
     }
 
     get showPhaseOneVerify() {

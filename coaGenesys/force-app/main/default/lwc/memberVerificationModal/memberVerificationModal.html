@@ -101,25 +101,6 @@
                     </div>
                 </template>
 
-                <!-- Caller Information - visible only for non-member callers -->
-                <template if:true={showCallerInfo}>
-                    <div class="slds-m-around_medium">
-                        <lightning-input label="Caller Name"
-                                         name="callerName"
-                                         value={nameValue}
-                                         required
-                                         data-validate
-                                         onchange={handleNameChange}>
-                        </lightning-input>
-
-                        <lightning-input label="Caller Phone"
-                                         name="callerPhone"
-                                         value={callerPhoneValue}
-                                         onchange={handleCallerPhoneChange}>
-                        </lightning-input>
-                    </div>
-                </template>
-
                 <!-- Representative Details Section -->
                 <template if:true={showRepresentativeDetails}>
                     <div class="slds-m-around_medium section-header">
@@ -221,6 +202,25 @@
                                         value={endDateValue}
                                         onchange={handleEndDateChange}
                                         class="slds-m-top_small">
+                        </lightning-input>
+                    </div>
+                </template>
+
+                <!-- Caller Information — shown after Representative Type is selected -->
+                <template if:true={showCallerInfo}>
+                    <div class="slds-m-around_medium">
+                        <lightning-input label="Caller Name"
+                                         name="callerName"
+                                         value={nameValue}
+                                         required
+                                         data-validate
+                                         onchange={handleNameChange}>
+                        </lightning-input>
+
+                        <lightning-input label="Caller Phone"
+                                         name="callerPhone"
+                                         value={callerPhoneValue}
+                                         onchange={handleCallerPhoneChange}>
                         </lightning-input>
                     </div>
                 </template>

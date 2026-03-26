@@ -17,7 +17,7 @@ export default class MemberVerificationModal extends LightningElement {
     masterAccountId = '';
     showDropdowns = true;
     showVerificationSection = false;
-    caseOriginValue = '';
+    caseOriginValue = 'Inbound - Phone Call';
     memberTypeValue = '';
     representativeTypeValue = '';
     relationshipTypeValue = '';

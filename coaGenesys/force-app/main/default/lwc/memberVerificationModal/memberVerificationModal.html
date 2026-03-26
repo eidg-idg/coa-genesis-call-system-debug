@@ -101,8 +101,8 @@
                     </div>
                 </template>
 
-                <!-- Caller Information - always visible during verification -->
-                <template if:true={showVerificationSection}>
+                <!-- Caller Information - visible only for non-member callers -->
+                <template if:true={showCallerInfo}>
                     <div class="slds-m-around_medium">
                         <lightning-input label="Caller Name"
                                          name="callerName"

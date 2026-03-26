@@ -53,6 +53,10 @@ export default class MemberVerificationModal extends LightningElement {
                this.caseOriginValue === 'Outbound - Phone Call';
     }
 
+    get showCallerInfo() {
+        return this.showVerificationSection && this.memberTypeValue === 'Non-Member';
+    }
+
     get showPhaseOneVerify() {
         return this.caseOriginValue && !this.isPhoneOrigin;
     }

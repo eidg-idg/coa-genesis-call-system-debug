@@ -2,9 +2,11 @@
 <template>
     <div class="host-container">
         <lightning-card title="Verify Member" icon-name="custom:custom14">
-            <div class="interaction-name-display slds-m-around_medium slds-align_absolute-center">
-                <p><b>Interaction:</b> {interactionName}</p>
-            </div>
+            <template if:true={interactionName}>
+                <div class="interaction-name-display slds-m-around_medium slds-align_absolute-center">
+                    <p><b>Interaction Number is:</b> {interactionName}</p>
+                </div>
+            </template>
 
             <div class="slds-m-around_medium">
                 <!-- Conditionally render dropdowns -->
@@ -12,7 +14,9 @@
                     <lightning-combobox name="caseOrigin"
                                         label="Case Origin"
                                         value={caseOriginValue}
+                                        placeholder="Select Case Origin"
                                         options={caseOriginOptions}
+                                        required
                                         onchange={handleCaseOriginChange}>
                     </lightning-combobox>
 
@@ -20,7 +24,9 @@
                         <lightning-combobox name="memberType"
                                             label="Member Type"
                                             value={memberTypeValue}
+                                            placeholder="Select Member Type"
                                             options={memberTypeOptions}
+                                            required
                                             onchange={handleMemberTypeChange}>
                         </lightning-combobox>
                     </template>
@@ -38,6 +44,12 @@
 
                 <!-- Verification Section, shown after dropdown selections are made -->
                 <template if:true={showVerificationSection}>
+                    <div class="slds-m-bottom_small section-header">
+                        <span class="slds-text-heading_small slds-text-title_bold">Member Details</span>
+                        <lightning-icon icon-name="utility:info" size="xx-small"
+                                       alternative-text="Info" class="slds-m-left_xx-small">
+                        </lightning-icon>
+                    </div>
                     <div class="slds-grid slds-wrap">
                         <!-- Left Column for Checkboxes -->
                         <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
@@ -65,13 +77,14 @@
                         </div>
                         <!-- Right Column for Data Fields -->
                         <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
-                            <p><b>Member Id:</b> {account.MemberID}</p>
-                            <p><b>SSN:</b> {account.ssn}</p>
-                            <p><b>Member Name:</b> {account.Name}</p>
-                            <p><b>DOB:</b> {formattedDateOfBirth}</p>
-                            <p><b>Phone:</b> {formattedPhoneNumber}</p>
-                            <div>
-                                <p><b>Mailing Address:</b></p>
+                            <p class="data-value">{account.MemberID}</p>
+                            <p class="data-value">{account.ssn}</p>
+                            <p class="data-value">{account.Name}</p>
+                            <p class="data-value">{formattedDateOfBirth}</p>
+                            <p class="data-value">
+                                <a href={phoneTelLink} class="phone-link">{formattedPhoneNumber}</a>
+                            </p>
+                            <div class="data-value">
                                 <pre>{fullMailingAddress}</pre>
                             </div>
                         </div>
@@ -85,6 +98,7 @@
                                          name="callerName"
                                          value={nameValue}
                                          required
+                                         data-validate
                                          onchange={handleNameChange}>
                         </lightning-input>
 
@@ -98,11 +112,17 @@
 
                 <!-- Representative Details Section -->
                 <template if:true={showRepresentativeDetails}>
+                    <div class="slds-m-around_medium section-header">
+                        <span class="slds-text-heading_small slds-text-title_bold">Representative Details</span>
+                    </div>
                     <div class="slds-m-around_medium">
                         <lightning-combobox name="representativeType"
                                             label="Representative Type"
                                             value={representativeTypeValue}
+                                            placeholder="Select Representative Type"
                                             options={representativeTypeOptions}
+                                            required
+                                            data-validate
                                             onchange={handleRepresentativeTypeChange}>
                         </lightning-combobox>
                     </div>
@@ -113,7 +133,10 @@
                             <lightning-combobox name="relationshipType"
                                                 label="Relationship Type"
                                                 value={relationshipTypeValue}
+                                                placeholder="Select Relationship Type"
                                                 options={relationshipTypeOptions}
+                                                required
+                                                data-validate
                                                 onchange={handleRelationshipTypeChange}>
                             </lightning-combobox>
                         </div>
@@ -156,12 +179,14 @@
                                         name="repName"
                                         value={repNameValue}
                                         required
+                                        data-validate
                                         onchange={handleRepNameChange}>
                         </lightning-input>
                         <lightning-input label="Caller Phone"
                                         name="repCallerPhone"
                                         value={repCallerPhoneValue}
                                         required
+                                        data-validate
                                         onchange={handleRepCallerPhoneChange}>
                         </lightning-input>
                         <lightning-textarea label="Description"
@@ -197,9 +222,18 @@
                     </div>
                 </template>
 
-                <!-- Center the button at the bottom -->
+                <!-- Action buttons -->
                 <div class="slds-grid slds-grid_align-center slds-m-top_medium">
-                    <lightning-button label={verifyButtonLabel} variant="brand" onclick={verify} disabled={isSaving}></lightning-button>
+                    <lightning-button label="Cancel" variant="brand"
+                                      icon-name="utility:close"
+                                      onclick={handleCancel}
+                                      class="slds-m-right_small">
+                    </lightning-button>
+                    <lightning-button label={verifyButtonLabel} variant="brand"
+                                      icon-name="utility:check"
+                                      onclick={verify}
+                                      disabled={isSaving}>
+                    </lightning-button>
                 </div>
             </div>
         </lightning-card>

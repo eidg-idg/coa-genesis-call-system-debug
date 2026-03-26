@@ -37,14 +37,14 @@ export default class MemberVerificationModal extends LightningElement {
             { label: 'Inbound - Phone Call', value: 'Inbound - Phone Call' },
             { label: 'Outbound - Phone Call', value: 'Outbound - Phone Call' },
             { label: 'Chat', value: 'Chat' },
-            { label: 'Walk In', value: 'Walk-In' },
+            { label: 'Walk-In', value: 'Walk-In' },
             { label: 'Research', value: 'Research' },
             { label: 'Transfer', value: 'Transfer' },
             { label: 'Email', value: 'Email' },
             { label: 'Fax', value: 'Fax' },
             { label: 'Voice Mail', value: 'Voice Mail' },
             { label: 'Mail', value: 'Mail' },
-            { label: 'Meeting - Virtual', value: 'Meeting – Virtual' },
+            { label: 'Meeting – Virtual', value: 'Meeting – Virtual' },
         ];
     }
 
@@ -95,12 +95,25 @@ export default class MemberVerificationModal extends LightningElement {
         return !this.fullMailingAddress;
     }
 
-    get formattedPhoneNumber() {
-        const phone = this.account.Phone;
-        if (phone && !phone.includes('-')) {
-            return `${phone.slice(0, 3)}-${phone.slice(3, 6)}-${phone.slice(6)}`;
+    get phoneTelLink() {
+        if (this.account && this.account.Phone) {
+            const digits = this.account.Phone.replace(/\D/g, '');
+            return digits.length >= 10 ? `tel:+1${digits}` : '#';
         }
-        return phone;
+        return '#';
+    }
+
+    get formattedPhoneNumber() {
+        const phone = this.account ? this.account.Phone : null;
+        if (phone) {
+            const digits = phone.replace(/\D/g, '');
+            const match = digits.match(/^(\d{3})(\d{3})(\d{4})$/);
+            if (match) {
+                return `(${match[1]}) ${match[2]}-${match[3]}`;
+            }
+            return phone;
+        }
+        return '';
     }
 
     get representativeTypeOptions() {
@@ -111,8 +124,12 @@ export default class MemberVerificationModal extends LightningElement {
     }
 
     get fullMailingAddress() {
-        const { MailingStreet, MailingCity, MailingState, MailingPostalCode } = this.account;
-        return `${MailingStreet}\n${MailingCity}, ${MailingState} ${MailingPostalCode}`;
+        const { MailingStreet, MailingCity, MailingState, MailingPostalCode, MailingCountry } = this.account;
+        let address = `${MailingStreet}\n${MailingCity}, ${MailingState} ${MailingPostalCode}`;
+        if (MailingCountry) {
+            address += `\n${MailingCountry}`;
+        }
+        return address;
     }
 
     get relationshipTypeOptions() {
@@ -159,10 +176,10 @@ export default class MemberVerificationModal extends LightningElement {
             const dateParts = this.account.DateOfBirth.match(/(\w+) (\d+), (\d+)/);
             if (dateParts) {
                 const months = {
-                    January: '01', February: '02', March: '03', April: '04', May: '05', June: '06', July: '07', August: '08', September: '09', October: '10', November: '11', December: '12'
+                    January: '1', February: '2', March: '3', April: '4', May: '5', June: '6', July: '7', August: '8', September: '9', October: '10', November: '11', December: '12'
                 };
                 const month = months[dateParts[1]];
-                const day = dateParts[2].padStart(2, '0');
+                const day = dateParts[2];
                 const year = dateParts[3];
                 return `${month}/${day}/${year}`;
             }
@@ -274,38 +291,42 @@ export default class MemberVerificationModal extends LightningElement {
         console.log('Test Account data on verify:', JSON.stringify(this.account));
 
         const recordId = this.extractRecordId(this.account);
-        if (recordId) {
-            this.masterAccountId = recordId;
-            console.log('Test Master Account ID:', this.masterAccountId);
-            console.log(this.checkedValues.length);
-
-            // Validate caller name is provided
-            if (!this.nameValue || this.nameValue.trim() === '') {
-                this.errorMessage = 'Caller Name is required.';
-                return;
-            }
-
-            if (this.checkedValues.length >= 3) {
-                const verificationData = {
-                    interactionId: this.interactionId,
-                    callerName: this.nameValue,
-                    accountId: this.masterAccountId,
-                    caseOrigin: this.caseOriginValue,
-                    representativeType: this.representativeTypeValue,
-                    callerPhone: this.callerPhoneValue,
-                };
-                console.log('Verification Data:', JSON.stringify(verificationData));
-
-                this.isSaving = true;
-                this.errorMessage = '';
-                this.createVerificationRecord(verificationData);
-            } else {
-                this.errorMessage = "I'm sorry, the member could not be verified. Please select at least three verification items.";
-            }
-        } else {
+        if (!recordId) {
             console.error('No recordId found in account data.');
             this.errorMessage = "I'm sorry, the member could not be verified.";
+            return;
         }
+        this.masterAccountId = recordId;
+
+        // Inline validation for all user-editable required fields
+        const allValid = [...this.template.querySelectorAll('[data-validate]')]
+            .reduce((valid, input) => {
+                input.reportValidity();
+                return valid && input.checkValidity();
+            }, true);
+
+        if (!allValid) {
+            return;
+        }
+
+        if (this.checkedValues.length < 3) {
+            this.errorMessage = "Please select at least three verification items.";
+            return;
+        }
+
+        const verificationData = {
+            interactionId: this.interactionId,
+            callerName: this.nameValue,
+            accountId: this.masterAccountId,
+            caseOrigin: this.caseOriginValue,
+            representativeType: this.representativeTypeValue,
+            callerPhone: this.callerPhoneValue,
+        };
+        console.log('Verification Data:', JSON.stringify(verificationData));
+
+        this.isSaving = true;
+        this.errorMessage = '';
+        this.createVerificationRecord(verificationData);
     }
 
     extractRecordId(account) {
@@ -349,6 +370,10 @@ export default class MemberVerificationModal extends LightningElement {
                 this.isSaving = false;
                 this.errorMessage = 'Verification record could not be saved. Please try again.';
             });
+    }
+
+    handleCancel() {
+        this.dispatchEvent(new CustomEvent('close'));
     }
 
     navigateToAccountPage(recordId) {

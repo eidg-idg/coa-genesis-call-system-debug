@@ -39,7 +39,7 @@ export default class VerifyMember extends LightningElement {
             const digits = phone.replace(/\D/g, '');
             const match = digits.match(/^(\d{3})(\d{3})(\d{4})$/);
             if (match) {
-                return `${match[1]}-${match[2]}-${match[3]}`;
+                return `(${match[1]}) ${match[2]}-${match[3]}`;
             }
             return phone;
         }
@@ -49,8 +49,8 @@ export default class VerifyMember extends LightningElement {
     formatDateOfBirth(dob) {
         if (dob) {
             const date = new Date(dob);
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString();
+            const day = date.getDate().toString();
             const year = date.getFullYear();
             return `${month}/${day}/${year}`;
         }

@@ -55,11 +55,16 @@ export default class ProviderVerificationModal extends LightningElement {
     }
 
     get formattedPhoneNumber() {
-        const phone = this.healthcareProvider.Phone;
-        if (phone && !phone.includes('-')) {
-            return `${phone.slice(0, 3)}-${phone.slice(3, 6)}-${phone.slice(6)}`;
+        const phone = this.healthcareProvider ? this.healthcareProvider.Phone : null;
+        if (phone) {
+            const digits = phone.replace(/\D/g, '');
+            const match = digits.match(/^(\d{3})(\d{3})(\d{4})$/);
+            if (match) {
+                return `(${match[1]}) ${match[2]}-${match[3]}`;
+            }
+            return phone;
         }
-        return phone;
+        return '';
     }
 
     get isAddressPresent() {
@@ -67,15 +72,22 @@ export default class ProviderVerificationModal extends LightningElement {
                this.healthcareProvider.ProviderState || this.healthcareProvider.ProviderZip;
     }
 
+    get phoneTelLink() {
+        if (this.healthcareProvider && this.healthcareProvider.Phone) {
+            const digits = this.healthcareProvider.Phone.replace(/\D/g, '');
+            return digits.length >= 10 ? `tel:+1${digits}` : '#';
+        }
+        return '#';
+    }
+
     get verificationOptionsWithDisabled() {
         const options = [
-            { label: 'NPI', value: 'NPI' },
             { label: 'Provider Name', value: 'Name' },
-            { label: 'Phone Number', value: 'Phone' },
-            { label: 'Provider Id', value: 'ProviderId' },
+            { label: 'Provider ID', value: 'ProviderId' },
             { label: 'Provider TIN', value: 'ProviderTIN' },
-            { label: 'Provider Status', value: 'Status' },
-            { label: 'Provider Address', value: 'ProviderAddress', isAddress: true },
+            { label: 'Provider Contact #', value: 'Phone' },
+            { label: 'Provider NPI', value: 'NPI' },
+            { label: 'Address', value: 'ProviderAddress', isAddress: true },
         ];
 
         const addressComponents = ['ProviderStreet', 'ProviderCity', 'ProviderState', 'ProviderZip'];
@@ -83,7 +95,7 @@ export default class ProviderVerificationModal extends LightningElement {
 
         return options.map(option => {
             const isDataPresent = this.healthcareProvider && this.healthcareProvider[option.value];
-            const isRequired = (option.value === 'NPI' && isDataPresent) || (option.isAddress && isAddressComplete);
+            const isRequired = option.value === 'NPI' && isDataPresent;
             option.showAsterisk = isRequired;
             option.cssClass = isRequired ? 'required-asterisk' : 'asterisk-placeholder';
             return {
@@ -149,23 +161,21 @@ export default class ProviderVerificationModal extends LightningElement {
         console.log('Interaction Name:', this.interactionName);
         console.log('Number of checked values:', this.checkedValues.length);
 
-        // Validate Case Origin is selected
-        if (!this.caseOriginValue) {
-            this.errorMessage = 'Please select a Case Origin before verifying.';
+        // Inline validation for all user-editable required fields
+        const allValid = [...this.template.querySelectorAll('[data-validate]')]
+            .reduce((valid, input) => {
+                input.reportValidity();
+                return valid && input.checkValidity();
+            }, true);
+
+        if (!allValid) {
             return;
         }
 
-        // Phone origins require full verification (P-01 gate + P-18 bypass)
-        if (this.isPhoneOrigin) {
-            if (!this.callerName || this.callerName.trim() === '') {
-                this.errorMessage = 'Caller Name is required.';
-                return;
-            }
-
-            if (this.checkedValues.length < 2) {
-                this.errorMessage = "Please select at least two verification options to proceed.";
-                return;
-            }
+        // Phone origins require checkbox minimum
+        if (this.isPhoneOrigin && this.checkedValues.length < 2) {
+            this.errorMessage = "Please select at least two verification options to proceed.";
+            return;
         }
 
         // D-6 dependency: callerName/callerPhone empty for non-phone (Option A)
@@ -207,6 +217,10 @@ export default class ProviderVerificationModal extends LightningElement {
                 this.isSaving = false;
                 this.errorMessage = 'Verification record could not be saved. Please try again.';
             });
+    }
+
+    handleCancel() {
+        this.dispatchEvent(new CustomEvent('close'));
     }
 
     navigateToProviderPage(recordId) {

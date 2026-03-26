@@ -53,3 +53,20 @@ pre {
 .asterisk-placeholder {
     visibility: hidden; /* Hides the asterisk */
 }
+
+.section-header {
+    display: flex;
+    align-items: center;
+}
+
+.data-value {
+    min-height: 22px; /* maintains row alignment with checkboxes */
+}
+
+.phone-link {
+    color: #0070d2;
+    text-decoration: none;
+}
+.phone-link:hover {
+    text-decoration: underline;
+}

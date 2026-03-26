@@ -36,6 +36,18 @@ pre {
     visibility: hidden;
 }
 
+.data-value {
+    min-height: 22px;
+}
+
+.phone-link {
+    color: #0070d2;
+    text-decoration: none;
+}
+.phone-link:hover {
+    text-decoration: underline;
+}
+
 .interaction-name-display {
     background-color: #2176d2; /* Salesforce blue */
     color: white;

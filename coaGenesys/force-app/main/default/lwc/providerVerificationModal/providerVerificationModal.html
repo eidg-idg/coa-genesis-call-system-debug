@@ -2,9 +2,11 @@
     <div class="host-container">
         <lightning-card title="Verify Provider" icon-name="custom:custom14">
             <!-- Interaction Number Display -->
-            <div class="interaction-name-display slds-m-around_medium slds-align_absolute-center">
-                <p><b>Interaction:</b> {interactionName}</p>
-            </div>
+            <template if:true={interactionName}>
+                <div class="interaction-name-display slds-m-around_medium slds-align_absolute-center">
+                    <p><b>Interaction Number is:</b> {interactionName}</p>
+                </div>
+            </template>
 
             <div class="slds-m-around_medium">
                 <!-- Case Origin Dropdown -->
@@ -14,6 +16,7 @@
                                         value={caseOriginValue}
                                         options={caseOriginOptions}
                                         required
+                                        data-validate
                                         onchange={handleCaseOriginChange}>
                     </lightning-combobox>
                 </div>
@@ -46,17 +49,17 @@
                             </template>
                         </div>
 
-                        <!-- Provider Information Display including Address in Block Format -->
+                        <!-- Provider Information Display — order matches checkbox column -->
                         <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
-                            <p><b>Provider NPI:</b> {healthcareProvider.NPI}</p>
-                            <p><b>Provider Name:</b> {healthcareProvider.Name}</p>
-                            <p><b>Phone Number:</b> {formattedPhoneNumber}</p>
-                            <p><b>Provider Id:</b> {healthcareProvider.ProviderId}</p>
-                            <p><b>Provider TIN:</b> {healthcareProvider.ProviderTIN}</p>
-                            <p><b>Provider Status:</b> {healthcareProvider.Status}</p>
+                            <p class="data-value">{healthcareProvider.Name}</p>
+                            <p class="data-value">{healthcareProvider.ProviderId}</p>
+                            <p class="data-value">{healthcareProvider.ProviderTIN}</p>
+                            <p class="data-value">
+                                <a href={phoneTelLink} class="phone-link">{formattedPhoneNumber}</a>
+                            </p>
+                            <p class="data-value">{healthcareProvider.NPI}</p>
                             <template if:true={isAddressPresent}>
-                                <div>
-                                    <p><b>Address:</b></p>
+                                <div class="data-value">
                                     <p>{healthcareProvider.ProviderStreet}</p>
                                     <p>{healthcareProvider.ProviderCity}, {healthcareProvider.ProviderState} {healthcareProvider.ProviderZip}</p>
                                 </div>
@@ -71,6 +74,7 @@
                                         name="callerName"
                                         value={callerName}
                                         required
+                                        data-validate
                                         onchange={handleInputChange}></lightning-input>
                         <lightning-input type="text"
                                         label="Phone Number"
@@ -113,9 +117,18 @@
                     </div>
                 </template>
 
-                <!-- Verification Button -->
+                <!-- Action buttons -->
                 <div class="slds-grid slds-grid_align-center slds-m-top_medium">
-                    <lightning-button label={verifyButtonLabel} variant="brand" onclick={verify} disabled={isSaving}></lightning-button>
+                    <lightning-button label="Cancel" variant="brand"
+                                      icon-name="utility:close"
+                                      onclick={handleCancel}
+                                      class="slds-m-right_small">
+                    </lightning-button>
+                    <lightning-button label={verifyButtonLabel} variant="brand"
+                                      icon-name="utility:check"
+                                      onclick={verify}
+                                      disabled={isSaving}>
+                    </lightning-button>
                 </div>
             </div>
         </lightning-card>

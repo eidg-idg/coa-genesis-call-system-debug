@@ -89,16 +89,16 @@
                                             required
                                             data-validate
                                             onchange={handleInputChange}></lightning-input>
-                            <lightning-input type="text"
-                                            label="Phone Number"
-                                            name="callerPhoneNumber"
-                                            value={callerPhoneNumber}
-                                            onchange={handleInputChange}></lightning-input>
                             <lightning-combobox name="callerType"
                                                 label="Caller Type"
                                                 value={callerTypeValue}
                                                 options={callerTypeOptions}
                                                 onchange={handleCallerTypeChange}></lightning-combobox>
+                            <lightning-input type="text"
+                                            label="Phone Number"
+                                            name="callerPhoneNumber"
+                                            value={callerPhoneNumber}
+                                            onchange={handleInputChange}></lightning-input>
                             <lightning-input type="text"
                                             label="Phone Extension"
                                             name="phoneExtension"

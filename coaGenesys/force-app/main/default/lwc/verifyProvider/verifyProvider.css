@@ -1,6 +1,11 @@
 /* verifyProvider.css */
 :host {
-    width: 80%; /* Ensures that the host element takes full width */
+    width: 80%;
+}
+
+.slds-modal__container {
+    max-width: 480px;
+    margin: 0 auto;
 }
 
 .slds-grid_align-spread > .slds-col {

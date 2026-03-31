@@ -1,5 +1,6 @@
 /* providerVerificationModal.css */
-.host-container {
+:host {
+    display: block;
     max-width: 480px;
     margin: 0 auto;
 }

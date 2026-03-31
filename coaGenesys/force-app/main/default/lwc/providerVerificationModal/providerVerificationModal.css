@@ -68,10 +68,11 @@ pre {
 }
 
 .interaction-name-display {
-    background-color: #2176d2; /* Salesforce blue */
+    background-color: #2176d2;
     color: white;
     text-align: center;
     padding: 10px;
     border-radius: 5px;
-    margin: 10px 0; /* Adjusts space around the box */
+    margin: 10px auto;
+    max-width: 60%;
 }

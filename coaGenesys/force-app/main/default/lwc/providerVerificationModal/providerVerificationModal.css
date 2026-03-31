@@ -73,7 +73,6 @@ pre {
     text-align: center;
     padding: 14px 20px;
     border-radius: 8px;
-    margin: 10px auto;
-    max-width: 80%;
+    margin: 10px 1rem;
     font-size: 1.125rem;
 }

@@ -3,6 +3,11 @@
     width: 80%; /* Ensures that the host element takes full width */
 }
 
+.provider-modal-container {
+    width: 400px !important;
+    max-width: 400px !important;
+}
+
 .slds-grid_align-spread > .slds-col {
     padding-right: 4px; /* Adjust padding to ensure alignment */
     padding-left: 4px;

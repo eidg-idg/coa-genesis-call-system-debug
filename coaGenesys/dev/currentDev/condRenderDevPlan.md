@@ -22,10 +22,14 @@ This section provides a lightweight, at-a-glance progress view for this plan. Pr
 
 | Scope | Total | Complete | Incomplete | % Done |
 |------|------:|---------:|-----------:|-------:|
-| Implementation Items (Groups A–C) | 23 | 0 | 23 | 0% |
-| Decision / Validation Items (Group D) | 6 | 0 | 6 | 0% |
+| Implementation Items (Groups A–C) | 23 | 23 | 0 | 100% |
+| Decision / Validation Items (Group D) | 6 | 1 | 5 | 17% |
 
-**Overall ratio (Implementation A–C):** 0 complete / 23 incomplete
+**Overall ratio (Implementation A–C):** 23 complete / 0 incomplete
+
+**Member QA:** Complete — all visual parity refinements incorporated (field layout, default values, phase buttons, close X, card title removal, rep field layout).
+
+**Provider QA:** Pending — plan items B-1 through B-6 are code-complete and deployed, but provider modal has not yet undergone the same visual parity QA as the member modal. Expected refinements include lightning-card title/icon removal, close X button in header, and any layout adjustments that emerge from screenshot comparison.
 
 ### Complexity & Expected Timeline
 

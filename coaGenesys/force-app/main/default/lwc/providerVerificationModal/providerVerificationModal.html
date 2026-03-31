@@ -1,6 +1,6 @@
 <template>
     <div class="host-container">
-        <lightning-card title="Verify Provider" icon-name="custom:custom14">
+        <lightning-card>
             <!-- Interaction Number Display -->
             <template if:true={interactionName}>
                 <div class="interaction-name-display slds-m-around_medium slds-align_absolute-center">
@@ -10,15 +10,19 @@
 
             <div class="slds-m-around_medium">
                 <!-- Case Origin Dropdown -->
-                <div class="slds-grid slds-grid_align-center slds-m-bottom_medium">
-                    <lightning-combobox name="caseOrigin"
-                                        label="Case Origin"
-                                        value={caseOriginValue}
-                                        options={caseOriginOptions}
-                                        required
-                                        data-validate
-                                        onchange={handleCaseOriginChange}>
-                    </lightning-combobox>
+                <div class="field-row slds-m-bottom_medium">
+                    <span class="field-label"><abbr class="slds-required" title="required">*</abbr>Case Origin</span>
+                    <div class="field-control">
+                        <lightning-combobox name="caseOrigin"
+                                            label="Case Origin"
+                                            value={caseOriginValue}
+                                            options={caseOriginOptions}
+                                            required
+                                            variant="label-hidden"
+                                            data-validate
+                                            onchange={handleCaseOriginChange}>
+                        </lightning-combobox>
+                    </div>
                 </div>
 
                 <!-- Phone-origin: full verification flow -->

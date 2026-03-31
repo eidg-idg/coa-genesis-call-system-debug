@@ -15,7 +15,7 @@ export default class ProviderVerificationModal extends LightningElement {
     @api callerANI = '';
 
     @track checkedValues = [];
-    caseOriginValue = '';
+    caseOriginValue = 'Inbound - Phone Call';
     isCallingOnBehalf = false;
     callerName = '';
     callerTypeValue = '';

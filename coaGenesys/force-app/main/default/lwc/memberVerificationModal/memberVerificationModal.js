@@ -147,6 +147,14 @@ export default class MemberVerificationModal extends LightningElement {
         return this.isSaving ? 'Saving...' : 'Verify';
     }
 
+    get callerNameForSave() {
+        return this.repNameValue || this.nameValue;
+    }
+
+    get callerPhoneForSave() {
+        return this.repCallerPhoneValue || this.callerPhoneValue;
+    }
+
     get verificationOptionsWithDisabled() {
         const options = [
             { label: 'Member ID', value: 'MemberID' },
@@ -315,11 +323,11 @@ export default class MemberVerificationModal extends LightningElement {
 
         const verificationData = {
             interactionId: this.interactionId,
-            callerName: this.nameValue,
+            callerName: this.callerNameForSave,
             accountId: this.masterAccountId,
             caseOrigin: this.caseOriginValue,
             representativeType: this.representativeTypeValue,
-            callerPhone: this.callerPhoneValue,
+            callerPhone: this.callerPhoneForSave,
         };
         console.log('Verification Data:', JSON.stringify(verificationData));
 

@@ -3,6 +3,12 @@
     <div class="host-container">
         <lightning-card>
             <div class="slds-m-around_medium">
+                <template if:true={interactionName}>
+                    <div class="interaction-name-display slds-m-bottom_medium slds-align_absolute-center">
+                        <p><b>Interaction Number is:</b> {interactionName}</p>
+                    </div>
+                </template>
+
                 <!-- Conditionally render dropdowns -->
                 <template if:true={showDropdowns}>
                 <div class="dropdown-section">
@@ -51,11 +57,6 @@
 
                 <!-- Verification Section, shown after dropdown selections are made -->
                 <template if:true={showVerificationSection}>
-                    <template if:true={interactionName}>
-                        <div class="interaction-name-display slds-m-bottom_medium slds-align_absolute-center">
-                            <p><b>Interaction Number is:</b> {interactionName}</p>
-                        </div>
-                    </template>
                     <div class="slds-m-bottom_small section-header">
                         <span class="slds-text-heading_small slds-text-title_bold">Member Details</span>
                         <lightning-icon icon-name="utility:info" size="xx-small"

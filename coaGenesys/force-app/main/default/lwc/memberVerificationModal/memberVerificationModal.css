@@ -5,7 +5,8 @@
     text-align: center;
     padding: 10px;
     border-radius: 5px;
-    margin: 10px 0; /* Adjusts space around the box */
+    margin: 10px auto; /* Adjusts space around the box */
+    max-width: 80%;
 }
 
 pre {

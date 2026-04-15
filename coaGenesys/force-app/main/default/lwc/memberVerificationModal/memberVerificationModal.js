@@ -148,7 +148,7 @@ export default class MemberVerificationModal extends LightningElement {
     }
 
     get callerNameForSave() {
-        return this.repNameValue || this.nameValue;
+        return this.repNameValue || this.nameValue || (this.account ? this.account.Name : '');
     }
 
     get callerPhoneForSave() {
@@ -280,14 +280,13 @@ export default class MemberVerificationModal extends LightningElement {
             return;
         }
         this.masterAccountId = recordId;
-        // D-6 dependency: callerName/callerPhone values depend on COA decision
         const verificationData = {
             interactionId: this.interactionId,
-            callerName: '',
+            callerName: this.callerNameForSave,
             accountId: this.masterAccountId,
             caseOrigin: this.caseOriginValue,
             representativeType: '',
-            callerPhone: '',
+            callerPhone: this.callerPhoneForSave,
         };
         this.isSaving = true;
         this.errorMessage = '';
